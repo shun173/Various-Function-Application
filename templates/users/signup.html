@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h2>ユーザー登録</h2>
+<p>{{ message }}</p>
+
+<form action="{%url 'users:signup' %}" method="post">{% csrf_token %}
+    <label>メールアドレス</label>
+    {{ form.email }}
+    {{ form.email.errors }}
+    <br>
+    <label>ユーザーネーム</label>
+    {{ form.username }}
+    {{ form.username.errors}}
+    <br>
+    <label>パスワード</label>
+    {{ form.password1 }}
+    {{ form.password1.errors }}
+    <br>
+    <label>パスワード（確認）</label>
+    {{ form.password2 }}
+    {{ form.password2.errors }}
+    <br>
+    <input type="submit" value="登録する">
+</form>
+
+{% endblock %}
