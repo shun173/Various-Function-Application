@@ -9,6 +9,8 @@ from django.contrib.auth.signals import user_logged_in
 from django.dispatch import receiver
 from django.utils import timezone
 
+from ecapp.models import Product
+
 
 class UserManager(BaseUserManager):
     """カスタムユーザーマネージャー"""
@@ -47,6 +49,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     username = models.CharField("username", max_length=50)
     address = models.CharField(max_length=100, blank=True)
     point = models.PositiveIntegerField(default=initial_point)
+    fav_products = models.ManyToManyField(Product, blank=True)
     is_staff = models.BooleanField("is_staff", default=False)
     is_active = models.BooleanField("is_activ", default=True)
     date_joined = models.DateTimeField("date_joind", default=timezone.now)
