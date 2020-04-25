@@ -1,11 +1,17 @@
 from django.urls import path
 from . import views
-from django.conf import settings
-from django.conf.urls.static import static
+
 
 app_name = 'ecapp'
 urlpatterns = [
-
+    path('', views.index, name='index'),
+    path('product/<int:product_id>/', views.detail, name='detail'),
+    path('toggele_fav_product_status/', views.toggle_fav_product_status,
+         name='toggele_fav_product_status'),
+    path('fav_products/', views.fav_products, name='fav_products'),
+    path('cart/', views.cart, name='cart'),
+    path('change_item_amount/', views.change_item_amount,
+         name='change_item_amount'),
+    path('order_history', views.order_history, name='order_history'),
 ]
 
-urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
