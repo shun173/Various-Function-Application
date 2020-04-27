@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.forms import UserChangeForm, UserCreationForm
 from django.utils.translation import ugettext_lazy as _
-from .models import User
+from .models import User, PointFluctuation, Questionnaire, Friend
 
 
 class MyUserChangeForm(UserChangeForm):
@@ -22,7 +22,7 @@ class MyUserCreationForm(UserCreationForm):
 class MyUserAdmin(UserAdmin):
     """カスタムユーザーモデルのAdmin"""
     fieldsets = (
-        (None, {'fields': ('email',  'password', 'fav_products')}),
+        (None, {'fields': ('email',  'password', 'icon', 'fav_products')}),
         (_('Personal info'), {
          'fields': ('username', 'address')}),
         (_('Permissions'), {'fields': ('is_active', 'is_staff', 'is_superuser',
@@ -44,3 +44,6 @@ class MyUserAdmin(UserAdmin):
 
 
 admin.site.register(User, MyUserAdmin)
+admin.site.register(Friend)
+admin.site.register(PointFluctuation)
+admin.site.register(Questionnaire)

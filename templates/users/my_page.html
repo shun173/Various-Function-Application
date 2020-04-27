@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div>
+    <table>
+        <tr>
+            <th>アカウント名</th>
+            <td>{{ request.user.username }}</td>
+        </tr>
+        <tr>
+            <th>Eメールアドレス</th>
+            <td>{{ request.user.email }}</td>
+        </tr>
+        <tr>
+            <th>住所</th>
+            <td>{{ request.user.address }}</td>
+        </tr>
+        <tr>
+            <th>ポイント</th>
+            <td>{{ request.user.point }}</td>
+        </tr>
+    </table>
+    <span><a href="">アカウント情報を変更</a></span>
+    <span><a href="">アンケートに答えてポイントゲット</a></span>
+</div>
+<div>
+    <a href="">友人一覧</a>
+    <a href="">自身の投稿</a>
+    <a href="">自身の出品</a>
+    <a href="">お気に入り</a>
+    <a href="">カート</a>
+    <a href="">注文履歴</a>
+    <a href="">ポイント履歴</a>
+</div>
+
+{% endblock %}
