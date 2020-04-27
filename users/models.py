@@ -4,11 +4,7 @@ from django.contrib.auth.base_user import AbstractBaseUser
 from django.core.mail import send_mail
 from django.utils import timezone
 from django.contrib.auth.base_user import BaseUserManager
-
-from django.contrib.auth.signals import user_logged_in
-from django.dispatch import receiver
-from django.utils import timezone
-
+from django.contrib.auth import get_user_model
 from ecapp.models import Product
 
 
@@ -48,6 +44,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     email = models.EmailField("メールアドレス", unique=True)
     username = models.CharField("username", max_length=50)
     address = models.CharField(max_length=100, blank=True)
+    icon = models.ImageField(upload_to='icons', blank=True)
     point = models.PositiveIntegerField(default=initial_point)
     fav_products = models.ManyToManyField(Product, blank=True)
     is_staff = models.BooleanField("is_staff", default=False)
@@ -55,7 +52,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     date_joined = models.DateTimeField("date_joind", default=timezone.now)
     last_login = models.DateTimeField("last_login", blank=True, null=True)
 
-    objecs = UserManager()
+    objects = UserManager()
 
     USERNAME_FIELD = "email"
     EMAIL_FIELD = "email"
@@ -73,8 +70,24 @@ class User(AbstractBaseUser, PermissionsMixin):
         return self.email
 
 
-@receiver(user_logged_in)
-def user_loged_in_callback(sender, request, user, **kwargs):
-    """ログインした際に呼ばれる"""
-    user.last_login = timezone.now()
-    user.save()
+class Friend(models.Model):
+    """友達を記録"""
+    owner = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='friend_owner')
+    friends = models.ForeignKey(User, on_delete=models.CASCADE)
+
+
+class PointFluctuation(models.Model):
+    """各ユーザーのポイントの変化を記録する"""
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    event = models.CharField(max_length=100)
+    change = models.IntegerField(default=0)
+    created_at = models.DateTimeField(auto_now=True)
+
+
+class Questionnaire(models.Model):
+    """アンケートモデル"""
+    user = models.ForeignKey(User, on_delete=models.PROTECT)
+    evaluation = models.IntegerField(default=3)
+    content = models.TextField(max_length=200)
+    created_at = models.DateTimeField(auto_now=True)

@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div>
+    {% if user.icon %}
+    <img src="{{ user.icon.url }}" alt="">
+    {% else %}
+    <img src="{% static 'default_icon.jpg' %}" alt="">
+    {% endif %}
+    <h1>{{ user.username }}</h1>
+    <form action="" method=" post">{% csrf_token %}
+        <input type="submit" name="add_friends" value="友達追加">
+    </form>
+</div>
+
+<div>
+    <a href="">記事一覧へ</a>
+    {% for article in articles %}
+    <p>{{ article.content }}</p>
+    <p>{{ article.good_count }}</p>
+    <form action="" method="post">{% csrf_token %}
+        <input type="submit" name="good" value="good">
+    </form>
+    {% endfor %}
+</div>
+
+<div>
+    <a href="">出品一覧へ</a>
+    {% for product in products %}
+    <div class="product">
+        <a href="{% url 'ecapp:detail' product.id %}">
+            <img src="{{ product.image.url }}" alt="">
+        </a>
+        <div class="product-info">
+            <div class="product-name">{{ product.name }}</div>
+            <div class="product-price">Point: {{ product.price }}</div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock %}

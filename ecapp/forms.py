@@ -1,4 +1,5 @@
 from django import forms
+from .models import Product
 
 
 class AddToCartForm(forms.Form):
@@ -21,3 +22,9 @@ class PurchaseForm(forms.Form):
         max_length=100,
         required=False
     )
+
+
+class SellForm(forms.ModelForm):
+    class Meta:
+        model = Product
+        fields = ['name', 'description', 'price', 'image']
