@@ -1,8 +1,14 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block content %}
 
 <div>
+    {% if friend.icon %}
+    <img src="{{ friend.icon.url }}" alt="">
+    {% else %}
+    <img src="{% static 'default_icon.jpg' %}" alt="">
+    {% endif %}
     <table>
         <tr>
             <th>アカウント名</th>

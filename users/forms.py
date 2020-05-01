@@ -1,6 +1,7 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.forms import UserCreationForm
 from django import forms
+from .models import Questionnaire
 
 
 class CustomUserCreationForm(UserCreationForm):
@@ -9,16 +10,24 @@ class CustomUserCreationForm(UserCreationForm):
         fields = ('email', 'username')
 
 
+class QuestionnaireForm(forms.ModelForm):
+    class Meta:
+        model = Questionnaire
+        fields = ['evaluation', 'content']
+
+
+DATA = [
+    ('全体', '全体'),
+    ('友人のみ', '友人のみ')
+]
+
+
 class SearchForm(forms.Form):
-    data = [
-        ('全体', '全体'),
-        ('友人のみ', '友人のみ')
-    ]
     select = forms.ChoiceField(
-        choices=data,
-        widget=forms.TextInput(attrs={'placeholder': '検索ワード'})
+        choices=DATA,
     )
     keyword = forms.CharField(
         max_length=100,
-        required=False
+        required=False,
+        widget=forms.TextInput(attrs={'placeholder': '検索ワード'})
     )

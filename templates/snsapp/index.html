@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<form action="{% url 'snsapp:index' %}" method="POST">{% csrf_token %}
+    {{ search_form.select }}
+    {{ search_form.keyword }}
+    <button type="submit">検索</button>
+</form>
+
+{% if 'my_articles' in request.path %}
+<div #style="font-weight:bold; font-size: 28px; margin-bottom: 20px;">
+    自身の投稿
+</div>
+{% endif %}
+
+{% for article in articles %}
+<div>
+    <div>
+        <img src="{{ article.product.image.url }}" alt="" class="product-img">
+        <span>{{ article.product.name }}</span>
+    </div>
+    <div>
+        <p>{{ article.content }}</p>
+    </div>
+    <div>
+        <span>{{ article.created_at }}</span>
+        <span>good{{ article.good_count }}コ</span>
+        <span>by {{ article.author.username }}</span>
+        <form action="" method="post">{% csrf_token %}
+            <input type="submit" name="good" value="good">
+        </form>
+    </div>
+</div>
+{% endfor %}
+
+{% endblock %}

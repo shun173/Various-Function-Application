@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+{% for friend in friends %}
+<div>
+    {% if friend.icon %}
+    <img src="{{ friend.icon.url }}" alt="">
+    {% else %}
+    <img src="{% static 'default_icon.jpg' %}" alt="">
+    {% endif %}
+    <h3>{{ friend.username }}</h3>
+    <p>投稿数：{{ friend.article_set.count }}</p>
+    <p>出品数：{{ friend.product_set.count }}</p>
+</div>
+{% endfor %}
+
+{% endblock %}

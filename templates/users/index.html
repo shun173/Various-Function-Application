@@ -1,7 +1,50 @@
 {% extends 'base.html' %}
+{% load humanize %}
 
 {% block content %}
 
-Various Functional Application トップページ
+<div>
+    <a href="{% url 'snsapp:index' %}">
+        <h2>SNSへ</h2>
+    </a>
+    {% for article in articles %}
+    <div>
+        <div>
+            <img src="{{ article.product.image.url }}" alt="" class="product-img">
+            <span>{{ article.product.name }}</span>
+        </div>
+        <div>
+            <p>{{ article.content }}</p>
+        </div>
+        <div>
+            <span>{{ article.created_at }}</span>
+            <span>good{{ article.good_count }}コ</span>
+            <span>by {{ article.author.username }}</span>
+            <form action="" method="post">{% csrf_token %}
+                <input type="submit" name="good" value="good">
+            </form>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+<br>
+<div>
+    <a href="{% url 'ecapp:index' %}">
+        <h2>ECへ</h2>
+    </a>
+    <div class="product-container">
+        {% for product in products %}
+        <div class="product">
+            <a href="{% url 'ecapp:detail' product.id %}">
+                <img src="{{ product.image.url }}" alt="" class="product-img">
+            </a>
+            <div class="product-info">
+                <div class="product-name">{{ product.name }}</div>
+                <div class="product-price">Point: {{ product.price | intcomma }}</div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
 
 {% endblock %}
