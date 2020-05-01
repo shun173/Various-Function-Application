@@ -3,15 +3,24 @@ from django.contrib.auth import authenticate, login
 from django.contrib.auth.signals import user_logged_in
 from django.dispatch import receiver
 from django.utils import timezone
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 
 from django.contrib.auth import get_user_model
+from .models import Friend, PointFluctuation
 from snsapp.models import Article
 from ecapp.models import Product
-from .forms import CustomUserCreationForm
+from .forms import CustomUserCreationForm, QuestionnaireForm
 
 
 def index(request):
-    return render(request, 'users/index.html')
+    articles = Article.objects.all().order_by('-created_at')
+    products = Product.objects.all().order_by('-id')
+    context = {
+        'articles': articles,
+        'products': products,
+    }
+    return render(request, 'users/index.html', context)
 
 
 def my_page(request):
@@ -29,6 +38,30 @@ def user_detail(request, user_id):
         'products': products,
     }
     return render(request, 'users/user_detail.html', context)
+
+
+@login_required
+def friend_list(request):
+    user = request.user
+    friend_instances = Friend.objects.filter(owner=user)
+    friends = []
+    for friend_instance in friend_instances:
+        friend = friend_instance.friends
+        friends.append(friend)
+    return render(request, 'users/friend_list.html', {'friends': friends})
+
+
+@login_required
+def point_history(request):
+    user = request.user
+    point_fluctuations = PointFluctuation.objects.filter(user=user)
+    return render(request, 'users/point_history.html', {'point_fluctuations': point_fluctuations})
+
+
+@login_required
+def questionnaire(request):
+    questionnaire_form = QuestionnaireForm()
+    return render(request, 'users/questionnaire.html', {'questionnaire_form': questionnaire_form})
 
 
 def signup(request):

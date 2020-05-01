@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h3>アンケートにご協力ください</h3>
+<form action="{% url 'users:questionnaire' %}" method="post">{% csrf_token %}
+    {{ questionnaire_form.content }}
+    {{ questionnaire_form.evaluation }}
+</form>
+
+{% endblock %}

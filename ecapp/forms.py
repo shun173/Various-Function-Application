@@ -27,4 +27,4 @@ class PurchaseForm(forms.Form):
 class SellForm(forms.ModelForm):
     class Meta:
         model = Product
-        fields = ['name', 'description', 'price', 'image']
+        fields = ['name', 'description', 'price', 'amount', 'image']

@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<h3>記事を投稿</h3>
+<div>
+    <form action="{% url 'snsapp:post_article' %}" method="post">{% csrf_token %}
+        {{ article_form.content }}
+        <label>対象商品</label>
+        {{ article_form.product }}
+        <button type="submit">投稿</button>
+    </form>
+</div>
+
+{% endblock %}

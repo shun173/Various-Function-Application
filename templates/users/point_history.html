@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+{% load humanize %}
+
+{% block content %}
+
+<h3>ポイント履歴</h3>
+<table>
+    <tr>
+        <th>日時</th>
+        <th>イベント</th>
+        <th>ポイント増減</th>
+    </tr>
+    {% for pf in point_fluctuations %}
+    <tr>
+        <td>{{ pf.created_at }}</td>
+        <td>{{ pf.event }}</td>
+        <td>{{ pf.change | intcomma }}</td>
+    </tr>
+    {% endfor %}
+</table>
+<h4>現在ポイント：{{ request.user.point | intcomma }}ポイント</h4>
+
+{% endblock %}

@@ -19,7 +19,8 @@
     <a href="">記事一覧へ</a>
     {% for article in articles %}
     <p>{{ article.content }}</p>
-    <p>{{ article.good_count }}</p>
+    <p>good{{ article.good_count }}コ</p>
+    <p>{{ article.created_at }}</p>
     <form action="" method="post">{% csrf_token %}
         <input type="submit" name="good" value="good">
     </form>

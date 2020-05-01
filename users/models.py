@@ -75,6 +75,7 @@ class Friend(models.Model):
     owner = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='friend_owner')
     friends = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_at = models.DateTimeField(auto_now=True)
 
 
 class PointFluctuation(models.Model):

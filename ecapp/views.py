@@ -1,17 +1,64 @@
+import re
+import json
+import requests
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.contrib import messages
-from .forms import AddToCartForm, PurchaseForm
+from django.contrib.auth import get_user_model
+from .forms import AddToCartForm, PurchaseForm, SellForm
+from users.models import Friend
+from users.forms import SearchForm
 from .models import Product, Sale
-
-import json
-import requests
 
 
 def index(request):
-    products = Product.objects.all().order_by('-id')
-    return render(request, 'ecapp/ec_index.html', {'products': products})
+    search_form = SearchForm(request.POST or None)
+    products = Product.objects.all()
+    # 検索フォーム
+    if request.method == 'POST':
+        if search_form.is_valid():
+            user = request.user
+            select = search_form.cleaned_data['select']
+            keyword = search_form.cleaned_data['keyword']
+
+            # ユーザー選択時の処理
+            if select == '友人のみ':
+                result_users = []
+                for friend_instance in Friend.objects.filter(owner=user):
+                    friend = friend_instance.friends
+                    result_users.append(friend)
+            if select == '全体':
+                user_model = get_user_model()
+                result_users = user_model.objects.all()
+
+            searched_products = []
+            for result_user in result_users:
+                products = Product.objects.filter(owner=result_user)
+                for product in products:
+                    searched_products.append(product)
+
+            # ワード検索時の処理
+            if keyword:
+                products = []
+                for product in searched_products:
+                    name = product.name
+                    owner = product.owner.username
+                    description = product.description
+                    if not description:
+                        description = ''
+                    text_list = [name, owner, description]
+                    text = ' '.join(text_list)
+                    if re.findall(keyword, text, re.IGNORECASE):
+                        products.append(product)
+            if not keyword:
+                products = searched_products
+
+    context = {
+        'search_form': search_form,
+        'products': products
+    }
+    return render(request, 'ecapp/index.html', context)
 
 
 def detail(request, product_id):
@@ -51,7 +98,14 @@ def toggle_fav_product_status(request):
 def fav_products(request):
     user = request.user
     products = user.fav_products.all()
-    return render(request, 'ecapp/ec_index.html', {'products': products})
+    return render(request, 'ecapp/index.html', {'products': products})
+
+
+@login_required
+def my_products(request):
+    user = request.user
+    products = Product.objects.filter(owner=user).order_by('-created_at')
+    return render(request, 'ecapp/index.html', {'products': products})
 
 
 @login_required
@@ -123,6 +177,28 @@ def change_item_amount(request):
     return redirect('ecapp:cart')
 
 
+@login_required
+def order_history(request):
+    user = request.user
+    sales = Sale.objects.filter(user=user).order_by('-created_at')
+    return render(request, 'ecapp/order_history.html', {'sales': sales})
+
+
+@login_required
+def sell(request):
+    if request.method == 'POST':
+        sell_form = SellForm(request.POST, request.FILES)
+        if sell_form.is_valid():
+            product = sell_form.save(commit=False)
+            product.owner = request.user
+            product.save()
+            messages.success(request, '商品を出品しました')
+            return redirect('ecapp:my_products')
+    else:
+        sell_form = SellForm()
+    return render(request, 'ecapp/sell.html', {'sell_form': sell_form})
+
+
 def get_address(zip_code):
     REQUEST_URL = f'http://zipcloud.ibsnet.co.jp/api/search?zipcode={zip_code}'
     address = ''
@@ -133,10 +209,3 @@ def get_address(zip_code):
         result = result[0]
         address = result['address1'] + result['address2'] + result['address3']
     return address
-
-
-@login_required
-def order_history(request):
-    user = request.user
-    sales = Sale.objects.filter(user=user).order_by('-created_at')
-    return render(request, 'ecapp/order_history.html', {'sales': sales})
