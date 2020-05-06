@@ -4,8 +4,11 @@
 
 <h3>アンケートにご協力ください</h3>
 <form action="{% url 'users:questionnaire' %}" method="post">{% csrf_token %}
-    {{ questionnaire_form.content }}
+    <label for="">このアプリに対する評価</label>
     {{ questionnaire_form.evaluation }}
+    <label for="">ご要望などがありましたらお書きください</label>
+    {{ questionnaire_form.content }}
+    <button type="submit">回答</button>
 </form>
 
 {% endblock %}

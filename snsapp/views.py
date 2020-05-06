@@ -3,9 +3,9 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import get_user_model
 from django.contrib import messages
-from .models import Article
+from .models import Article, Good
 from .forms import ArticleForm
-from users.models import Friend
+from users.models import Friend, PointFluctuation
 from users.forms import SearchForm
 from ecapp.models import Product
 
@@ -87,3 +87,36 @@ def post_article(request):
         user_id = request.user.id
         article_form = ArticleForm(user_id=user_id)
     return render(request, 'snsapp/post_article.html', {'article_form': article_form})
+
+
+@login_required
+def good(request, pk):
+    user = request.user
+    article = Article.objects.get(pk=pk)
+
+    # 送信元アプリの判別
+    ref_url = request.META['HTTP_REFERER']
+    if 'snsapp' in ref_url:
+        app = 'snsapp'
+    else:
+        app = 'users'
+
+    # ユーザーが既にgoodを押していたときは何もせずリダイレクト
+    if Good.objects.filter(pusher=user).filter(article=article):
+        messages.warning(request, '既にgoodを押した記事です')
+        return redirect(f'{app}:index')
+
+    # good_countを増やす
+    article.good_count += 1
+    article.save()
+
+    # ポイント履歴を記録
+    point_fluctuation = PointFluctuation(
+        user=article.author, event=f'記事"{article.content}"にgoodが押されました', change=1)
+    point_fluctuation.save()
+
+    # goodを記録
+    good = Good.objects.create(pusher=user, article=article)
+    good.save()
+    messages.success(request, '記事にgoodしました')
+    return redirect(f'{app}:index')

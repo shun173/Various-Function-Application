@@ -27,7 +27,7 @@
         <span>{{ article.created_at }}</span>
         <span>good{{ article.good_count }}コ</span>
         <span>by {{ article.author.username }}</span>
-        <form action="" method="post">{% csrf_token %}
+        <form action="{% url 'snsapp:good' article.pk %}" method="post">{% csrf_token %}
             <input type="submit" name="good" value="good">
         </form>
     </div>

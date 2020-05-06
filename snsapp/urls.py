@@ -6,4 +6,5 @@ urlpatterns = [
     path('', views.index, name='index'),
     path('my_articles/', views.my_articles, name='my_articles'),
     path('post_article/', views.post_article, name='post_article'),
+    path('good/<int:pk>', views.good, name='good'),
 ]

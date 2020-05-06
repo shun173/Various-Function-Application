@@ -1,14 +1,16 @@
 import re
 import json
 import requests
+from django.conf import settings
 from django.shortcuts import get_object_or_404, render, redirect
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from .forms import AddToCartForm, PurchaseForm, SellForm
-from users.models import Friend
+from users.models import Friend, PointFluctuation
 from users.forms import SearchForm
+from users.views import get_address
 from .models import Product, Sale
 
 
@@ -121,16 +123,8 @@ def cart(request):
 
     purchase_form = PurchaseForm(request.POST, None)
     if purchase_form.is_valid():
-        if 'search_address' in request.POST:
-            zip_code = request.POST['zip_code']
-            address = get_address(zip_code)
-            if not address:
-                messages.warning(request, "住所を取得できませんでした。")
-                return redirect('ecapp:cart')
-            purchase_form = PurchaseForm(
-                initial={'zip_code': zip_code, 'address': address})
         if 'buy_product' in request.POST:
-            if not purchase_form.cleaned_data['address']:
+            if not user.address:
                 messages.warning(request, "住所の入力は必須です。")
                 return redirect('ecapp:cart')
             if not bool(cart):
@@ -146,6 +140,29 @@ def cart(request):
                 sale = Sale(product=product, user=user,
                             amount=num, price=product.price)
                 sale.save()
+                # ポイント履歴を記録
+                # 購入者
+                sum = product.price * num
+                point_flactuation = PointFluctuation(
+                    user=user, event=f'{product.name}を{num}個購入', change=-sum)
+                point_flactuation.save()
+                # 出品者
+                owner = product.owner
+                owner.point += sum
+                owner.save()
+                point_flactuation = PointFluctuation(
+                    user=owner, event=f'{product.name}が{num}個売れた', change=sum)
+                point_flactuation.save()
+                # 出品者にメール送信
+                subject = '商品が購入されました'
+                message = f'''商品　：　{product.name}　が　{num}個　購入されました。\n\n
+                            購入者　：　{user.username}\n
+                            住所　：　{user.address}\n\n
+                            上記の住所に商品を届けてください。その後{sum}ポイントが付与されます。
+                '''
+                from_email = settings.DEFAULT_FROM_EMAIL
+                owner.email_user(
+                    subject=subject, message=message, from_email=from_email)
             user.point -= total_price
             user.save()
             del request.session['cart']
@@ -197,15 +214,3 @@ def sell(request):
     else:
         sell_form = SellForm()
     return render(request, 'ecapp/sell.html', {'sell_form': sell_form})
-
-
-def get_address(zip_code):
-    REQUEST_URL = f'http://zipcloud.ibsnet.co.jp/api/search?zipcode={zip_code}'
-    address = ''
-    response = requests.get(REQUEST_URL, timeout=5)
-    response = json.loads(response.text)
-    result, api_status = response['results'], response['status']
-    if api_status == 200:
-        result = result[0]
-        address = result['address1'] + result['address2'] + result['address3']
-    return address

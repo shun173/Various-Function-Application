@@ -10,6 +10,28 @@ class CustomUserCreationForm(UserCreationForm):
         fields = ('email', 'username')
 
 
+class ProfileForm(forms.Form):
+    username = forms.CharField(
+        label='ユーザー名',
+        max_length=20,
+    )
+    email = forms.EmailField(
+        label='Eメールアドレス',
+        max_length=50
+    )
+    zip_code = forms.CharField(
+        label='郵便番号',
+        max_length=7,
+        required=False,
+        widget=forms.TextInput(attrs={'placeholder': '数字７桁（ハイフンなし）'})
+    )
+    address = forms.CharField(
+        label='住所',
+        max_length=100,
+        required=False
+    )
+
+
 class QuestionnaireForm(forms.ModelForm):
     class Meta:
         model = Questionnaire

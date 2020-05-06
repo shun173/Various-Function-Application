@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<form action="{% url 'users:edit_profile' %}" method="post">{% csrf_token %}
+    {{ profile_form.username.label_tag }}
+    {{ profile_form.username }}
+    {{ profile_form.email.label_tag }}
+    {{ profile_form.email }}
+    {{ profile_form.zip_code.label_tag }}
+    {{ profile_form.zip_code }}
+    <input type="submit" name="search_address" value="住所を検索">
+    {{ profile_form.address.label_tag }}
+    {{ profile_form.address }}
+    <button type="submit">更新</button>
+</form>
+
+{% endblock %}

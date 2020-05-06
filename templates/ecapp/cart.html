@@ -9,19 +9,12 @@
     <div class="purchase-form">
         <form action="{% url 'ecapp:cart' %}" method="post">{% csrf_token %}
             <div class="purchase-form-container">
-                <div class="purchase-form-address">
-                    <div>
-                        {{ purchase_form.non_field_errors }}
-                        {{ purchase_form.zip_code.label_tag }}
-                        {{ purchase_form.zip_code }}
-                        <input type="submit" name="search_address" value="住所を検索">
-                        <span>{{ purchase_form.zip_code.help_text }}</span>
-                    </div>
-                    <div>
-                        {{ purchase_form.address.label_tag }}
-                        {{ purchase_form.address }}
-                    </div>
-                </div>
+                {% if request.user.address %}
+                <p>{{ request.user.address }} にお届け</p>
+                {% else %}
+                <p>住所が設定されていません</p>
+                {% endif %}
+                <a href="{% url 'users:edit_profile' %}">アカウント設定</a>
                 <div class="purchase-form-pay">
                     請求額：{{ total_price | intcomma }}
                     <input type="submit" name="buy_product" value="購入する" class="purchase-button">

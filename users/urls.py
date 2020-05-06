@@ -7,6 +7,7 @@ app_name = 'users'
 urlpatterns = [
     path('', views.index, name='index'),
     path('my_page/', views.my_page, name='my_page'),
+    path('edit_profile', views.edit_profile, name='edit_profile'),
     path('user_detail/<int:user_id>', views.user_detail, name='user_detail'),
     path('friend_list/', views.friend_list, name='friend_list'),
     path('point_history/', views.point_history, name='point_history'),
