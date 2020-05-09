@@ -51,6 +51,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     is_active = models.BooleanField("is_activ", default=True)
     date_joined = models.DateTimeField("date_joind", default=timezone.now)
     last_login = models.DateTimeField("last_login", blank=True, null=True)
+    last_login_date = models.DateField(blank=True, null=True)
+    continuous_login = models.PositiveIntegerField(default=0)
 
     objects = UserManager()
 

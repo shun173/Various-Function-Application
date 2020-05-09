@@ -18,7 +18,8 @@ class ArticleForm(forms.Form):
         products = []
         for sale in sales:
             product = sale.product
-            products.append(product)
+            if product not in products:
+                products.append(product)
         self.fields['product'] = forms.ChoiceField(
             choices=[(None, '-')] + [(product.pk, product.name)
                                      for product in products],

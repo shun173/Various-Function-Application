@@ -1,37 +1,67 @@
 {% extends 'base.html' %}
 
-{% block content %}
+{% block header %}
+{% include 'snsapp/header.html' %}
+{% endblock %}
 
-<form action="{% url 'snsapp:index' %}" method="POST">{% csrf_token %}
-    {{ search_form.select }}
-    {{ search_form.keyword }}
-    <button type="submit">検索</button>
-</form>
+{% block content %}
 
 {% if 'my_articles' in request.path %}
 <div #style="font-weight:bold; font-size: 28px; margin-bottom: 20px;">
     自身の投稿
 </div>
+
+{% elif 'good_articles' in request.path %}
+<div #style="font-weight:bold; font-size: 28px; margin-bottom: 20px;">
+    goodした投稿
+</div>
+
+{% else %}
+<form action="{% url 'snsapp:index' %}" method="POST">{% csrf_token %}
+    {{ search_form.select }}
+    {{ search_form.keyword }}
+    <button type="submit">検索</button>
+</form>
 {% endif %}
 
 {% for article in articles %}
 <div>
     <div>
-        <img src="{{ article.product.image.url }}" alt="" class="product-img">
-        <span>{{ article.product.name }}</span>
+        <a href="{% url 'ecapp:detail_from_article' %}?product_id={{ article.product.id }}&article_id={{ article.id }}">
+            <img src="{{ article.product.image.url }}" alt="" class="product-img">
+            <span>{{ article.product.name }}</span>
+        </a>
     </div>
     <div>
         <p>{{ article.content }}</p>
     </div>
+    {% if article.author == request.user %}
+    <form action="{% url 'snsapp:delete' article.id %}" method="post">{% csrf_token %}
+        <button type="submit" onclick="return confirm('本当に削除しますか？');">削除</button>
+    </form>
+    {% endif %}
     <div>
-        <span>{{ article.created_at }}</span>
-        <span>good{{ article.good_count }}コ</span>
-        <span>by {{ article.author.username }}</span>
         <form action="{% url 'snsapp:good' article.pk %}" method="post">{% csrf_token %}
             <input type="submit" name="good" value="good">
         </form>
+        <span>{{ article.created_at }}</span>
+        <span>good{{ article.good_count }}コ</span>
+        <span>by {{ article.author.username }}</span>
     </div>
 </div>
 {% endfor %}
+
+<div>
+    {% if articles.has_previous %}
+    <a href="{% url 'snsapp:index' %}?page=1">&laquo;first</a>
+    <a href="{% url 'snsapp:index' %}?page={{ articles.previous_page_number }}">&laquo;prev</a>
+    {% endif %}
+    <span>{{ articles.number }}/{{ articles.paginator.num_pages }}</span>
+    {% if articles.has_next %}
+    <a href="{% url 'snsapp:index' %}?page={{ articles.next_page_number }}">next&raquo;</a>
+    <a href="{% url 'snsapp:index' %}?page={{ articles.paginator.num_pages }}">last&raquo;</a>
+    {% endif %}
+</div>
+
 
 {% endblock %}

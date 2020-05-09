@@ -2,6 +2,10 @@
 {% load humanize %}
 {% load filters %}
 
+{% block header %}
+{% include 'ecapp/header.html' %}
+{% endblock %}
+
 {% block content %}
 
 <div class="cart">
@@ -13,8 +17,20 @@
                 <p>{{ request.user.address }} にお届け</p>
                 {% else %}
                 <p>住所が設定されていません</p>
+                <div class="purchase-form-address">
+                    <div>
+                        {{ purchase_form.non_field_errors }}
+                        {{ purchase_form.zip_code.label_tag }}
+                        {{ purchase_form.zip_code }}
+                        <input type="submit" name="search_address" value="住所を検索">
+                        <span>{{ purchase_form.zip_code.help_text }}</span>
+                    </div>
+                    <div>
+                        {{ purchase_form.address.label_tag }}
+                        {{ purchase_form.address }}
+                    </div>
+                </div>
                 {% endif %}
-                <a href="{% url 'users:edit_profile' %}">アカウント設定</a>
                 <div class="purchase-form-pay">
                     請求額：{{ total_price | intcomma }}
                     <input type="submit" name="buy_product" value="購入する" class="purchase-button">
@@ -22,6 +38,11 @@
             </div>
         </form>
     </div>
+
+    {% if not cart_products %}
+    <h3>カートは空です</h3>
+    {% endif %}
+
     {% for product, num in cart_products.items %}
     <div class="order-item">
         <div class="order-item-image">
@@ -31,6 +52,7 @@
         </div>
         <div class="order-item-info">
             <h2>{{ product.name }}</h2>
+            <h4>在庫：　{{ product.amount }}個</h4>
             <div>価格：<span class="info-value">{{ product.price | intcomma }}</span></div>
             <div>個数：<span class="info-value">{{ num | intcomma }}</span></div>
             <hr>
@@ -45,6 +67,19 @@
         </div>
     </div>
     {% endfor %}
+
+    <div>
+        {% if products.has_previous %}
+        <a href="{% url 'ecapp:cart' %}?page=1">&laquo;first</a>
+        <a href="{% url 'ecapp:cart' %}?page={{ products.previous_page_number }}">&laquo;prev</a>
+        {% endif %}
+        <span>{{ products.number }}/{{ products.paginator.num_pages }}</span>
+        {% if products.has_next %}
+        <a href="{% url 'ecapp:cart' %}?page={{ products.next_page_number }}">next&raquo;</a>
+        <a href="{% url 'ecapp:cart' %}?page={{ products.paginator.num_pages }}">last&raquo;</a>
+        {% endif %}
+    </div>
+
 </div>
 
 {% endblock %}

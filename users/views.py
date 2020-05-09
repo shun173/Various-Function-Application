@@ -1,7 +1,9 @@
 import json
 import requests
+import datetime
 from django.conf import settings
 from django.shortcuts import render, redirect
+from django.core.paginator import Paginator
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.signals import user_logged_in
 from django.dispatch import receiver
@@ -10,6 +12,9 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.contrib.auth import get_user_model
+#from django.contrib.auth.views import PasswordChangeView, PasswordChangeDoneView
+#from django.contrib.auth.mixins import LoginRequiredMixin
+#from django.urls import reverse_lazy
 from .models import Friend, PointFluctuation, Questionnaire
 from snsapp.models import Article
 from ecapp.models import Product
@@ -79,13 +84,20 @@ def friend_list(request):
     for friend_instance in friend_instances:
         friend = friend_instance.friends
         friends.append(friend)
+    num = request.GET.get('page')
+    friends = Paginator(friends, 10)
+    friends = friends.get_page(num)
     return render(request, 'users/friend_list.html', {'friends': friends})
 
 
 @login_required
 def point_history(request):
     user = request.user
-    point_fluctuations = PointFluctuation.objects.filter(user=user)
+    point_fluctuations = PointFluctuation.objects.filter(
+        user=user).order_by('-created_at')
+    num = request.GET.get('page')
+    point_fluctuations = Paginator(point_fluctuations, 10)
+    point_fluctuations = point_fluctuations.get_page(num)
     return render(request, 'users/point_history.html', {'point_fluctuations': point_fluctuations})
 
 
@@ -105,9 +117,8 @@ def questionnaire(request):
         # ポイント付与
         user.point += 300
         user.save()
-        point_fluctuations = PointFluctuation(
+        PointFluctuation.objects.create(
             user=user, event='アンケートに回答', change=300)
-        point_fluctuations.save()
 
         questionnaire = Questionnaire(
             user=user, content=content, evaluation=evaluation)
@@ -157,5 +168,23 @@ def get_address(zip_code):
 @receiver(user_logged_in)
 def user_loged_in_callback(sender, request, user, **kwargs):
     """ログインした際に呼ばれる"""
-    user.last_login = timezone.now()
+    today = datetime.date.today()
+    if not request.user.last_login_date:
+        user.last_login_date = today
+        user.save()
+    last_login_date = user.last_login_date
+    if today != last_login_date:
+        next_day = last_login_date + datetime.timedelta(days=1)
+        if today == next_day:
+            user.continuous_login += 1
+        else:
+            user.continuous_login = 1
+        add_point = 100 * user.continuous_login
+        user.point += add_point
+        user.save()
+        PointFluctuation.objects.create(
+            user=user, event='連続ログインボーナス', change=add_point)
+        messages.success(
+            request, f'{user.username}さん、お帰りなさい。{user.continuous_login}日連続ログインボーナス：{add_point}ポイント 贈呈')
+    user.last_login_date = today
     user.save()

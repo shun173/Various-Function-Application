@@ -10,29 +10,47 @@
     <img src="{% static 'default_icon.jpg' %}" alt="">
     {% endif %}
     <h1>{{ user.username }}</h1>
-    <form action="" method=" post">{% csrf_token %}
+    {% if user in request.user.friends %}
+    <form action="{% url 'users:add_friend' user.id %}" method=" post">{% csrf_token %}
         <input type="submit" name="add_friends" value="友達追加">
     </form>
+    {% else %}
+    <span>友達追加済み</span>
+    {% endif %}
 </div>
 
 <div>
     <a href="">記事一覧へ</a>
     {% for article in articles %}
-    <p>{{ article.content }}</p>
-    <p>good{{ article.good_count }}コ</p>
-    <p>{{ article.created_at }}</p>
-    <form action="" method="post">{% csrf_token %}
-        <input type="submit" name="good" value="good">
-    </form>
+    <div>
+        <div>
+            <a
+                href="{% url 'ecapp:detail_from_article' %}?product_id={{ article.product.id }}&article_id={{ article.id }}">
+                <img src="{{ article.product.image.url }}" alt="" class="product-img">
+                <span>{{ article.product.name }}</span>
+            </a>
+        </div>
+        <div>
+            <p>{{ article.content }}</p>
+        </div>
+        <div>
+            <span>{{ article.created_at }}</span>
+            <span>good{{ article.good_count }}コ</span>
+            <span>by {{ article.author.username }}</span>
+            <form action="{% url 'snsapp:good' article.pk %}" method="post">{% csrf_token %}
+                <input type="submit" name="good" value="good">
+            </form>
+        </div>
+    </div>
     {% endfor %}
 </div>
-
+<hr>
 <div>
     <a href="">出品一覧へ</a>
     {% for product in products %}
     <div class="product">
         <a href="{% url 'ecapp:detail' product.id %}">
-            <img src="{{ product.image.url }}" alt="">
+            <img src="{{ product.image.url }}" alt="" class="product-img">
         </a>
         <div class="product-info">
             <div class="product-name">{{ product.name }}</div>

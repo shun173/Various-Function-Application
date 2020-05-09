@@ -4,14 +4,17 @@
 {% block content %}
 
 <div>
-    <a href="{% url 'snsapp:index' %}">
+    <a href="{% url 'snsapp:index' %}?page=1">
         <h2>SNSへ</h2>
     </a>
     {% for article in articles %}
     <div>
         <div>
-            <img src="{{ article.product.image.url }}" alt="" class="product-img">
-            <span>{{ article.product.name }}</span>
+            <a
+                href="{% url 'ecapp:detail_from_article' %}?product_id={{ article.product.id }}&article_id={{ article.id }}">
+                <img src="{{ article.product.image.url }}" alt="" class="product-img">
+                <span>{{ article.product.name }}</span>
+            </a>
         </div>
         <div>
             <p>{{ article.content }}</p>
@@ -29,7 +32,7 @@
 </div>
 <br>
 <div>
-    <a href="{% url 'ecapp:index' %}">
+    <a href="{% url 'ecapp:index' %}?page=1">
         <h2>ECへ</h2>
     </a>
     <div class="product-container">
@@ -41,6 +44,7 @@
             <div class="product-info">
                 <div class="product-name">{{ product.name }}</div>
                 <div class="product-price">Point: {{ product.price | intcomma }}</div>
+                <div>在庫：　{{ product.amount | intcomma }}個</div>
             </div>
         </div>
         {% endfor %}

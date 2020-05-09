@@ -5,15 +5,29 @@
 
 {% for friend in friends %}
 <div>
-    {% if friend.icon %}
-    <img src="{{ friend.icon.url }}" alt="">
-    {% else %}
-    <img src="{% static 'default_icon.jpg' %}" alt="">
-    {% endif %}
-    <h3>{{ friend.username }}</h3>
+    <a href="{% url 'users:user_detail' friend.id %}">
+        {% if friend.icon %}
+        <img src="{{ friend.icon.url }}" alt="">
+        {% else %}
+        <img src="{% static 'default_icon.jpg' %}" alt="">
+        {% endif %}
+        <h3>{{ friend.username }}</h3>
+    </a>
     <p>投稿数：{{ friend.article_set.count }}</p>
     <p>出品数：{{ friend.product_set.count }}</p>
 </div>
 {% endfor %}
+
+<div>
+    {% if friends.has_previous %}
+    <a href="{% url 'users:friend_list' %}?page=1">&laquo;first</a>
+    <a href="{% url 'users:friend_list' %}?page={{ friends.previous_page_number }}">&laquo;prev</a>
+    {% endif %}
+    <span>{{ friends.number }}/{{ friends.paginator.num_pages }}</span>
+    {% if friends.has_next %}
+    <a href="{% url 'users:friend_list' %}?page={{ friends.next_page_number }}">next&raquo;</a>
+    <a href="{% url 'users:friend_list' %}?page={{ friends.paginator.num_pages }}">last&raquo;</a>
+    {% endif %}
+</div>
 
 {% endblock %}

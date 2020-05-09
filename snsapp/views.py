@@ -1,6 +1,8 @@
 import re
 from django.shortcuts import render, redirect
+from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 from django.contrib.auth import get_user_model
 from django.contrib import messages
 from .models import Article, Good
@@ -54,6 +56,11 @@ def index(request):
             if not keyword:
                 articles = searched_articles
 
+    num = request.GET.get('page')
+    if not num:
+        num = 1
+    articles = Paginator(articles, 20)
+    articles = articles.get_page(num)
     context = {
         'search_form': search_form,
         'articles': articles
@@ -62,9 +69,26 @@ def index(request):
 
 
 @login_required
+def good_articles(request):
+    user = request.user
+    good_objects = Good.objects.filter(pusher=user)
+    articles = []
+    for good in good_objects:
+        article = good.article
+        articles.append(article)
+    num = request.GET.get('page')
+    articles = Paginator(articles, 20)
+    articles = articles.get_page(num)
+    return render(request, 'snsapp/index.html', {'articles': articles})
+
+
+@login_required
 def my_articles(request):
     user = request.user
     articles = Article.objects.filter(author=user)
+    num = request.GET.get('page')
+    articles = Paginator(articles, 20)
+    articles = articles.get_page(num)
     return render(request, 'snsapp/index.html', {'articles': articles})
 
 
@@ -90,6 +114,14 @@ def post_article(request):
 
 
 @login_required
+@require_POST
+def delete(request, article_id):
+    article = Article.objects.get(id=article_id)
+    article.delete()
+    return redirect('snsapp:index')
+
+
+@login_required
 def good(request, pk):
     user = request.user
     article = Article.objects.get(pk=pk)
@@ -111,9 +143,8 @@ def good(request, pk):
     article.save()
 
     # ポイント履歴を記録
-    point_fluctuation = PointFluctuation(
+    PointFluctuation.objects.create(
         user=article.author, event=f'記事"{article.content}"にgoodが押されました', change=1)
-    point_fluctuation.save()
 
     # goodを記録
     good = Good.objects.create(pusher=user, article=article)

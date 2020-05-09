@@ -16,10 +16,10 @@
             <div class="header-menu">
                 {% if request.user.is_authenticated %}
                 <span>Point: {{ user.point | intcomma }}</span>
-                <span><a href="{% url 'ecapp:fav_products' %}">お気に入り</a></span>
-                <span><a href="{% url 'ecapp:cart' %}">カート</a></span>
-                <span><a href="{% url 'ecapp:order_history' %}">注文履歴</a></span>
-                <span><a href="{% url 'users:logout' %}">ログアウト</a></span>
+                <span><a href="{% url 'users:my_page' %}">My Page</a></span>
+                {% block header %}{% endblock %}
+                <span><a href="{% url 'users:logout' %}"
+                        onclick="return confirm('カート内の商品は全てリセットされます。本当にログアウトしますか？');">ログアウト</a></span>
                 {% else %}
                 <span><a href="{% url 'users:login' %}">ログイン</a></span>
                 <span><a href="{% url 'users:signup' %}">新規登録</a></span>

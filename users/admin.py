@@ -22,12 +22,14 @@ class MyUserCreationForm(UserCreationForm):
 class MyUserAdmin(UserAdmin):
     """カスタムユーザーモデルのAdmin"""
     fieldsets = (
-        (None, {'fields': ('email',  'password', 'icon', 'fav_products')}),
+        (None, {'fields': ('email',  'password', 'icon',
+                           'fav_products', 'point', 'continuous_login')}),
         (_('Personal info'), {
          'fields': ('username', 'address')}),
         (_('Permissions'), {'fields': ('is_active', 'is_staff', 'is_superuser',
                                        'groups', 'user_permissions')}),
-        (_('Important dates'), {'fields': ('last_login', 'date_joined')}),
+        (_('Important dates'), {
+         'fields': ('last_login', 'last_login_date', 'date_joined')}),
     )
     add_fieldsets = (
         (None, {

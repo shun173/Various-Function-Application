@@ -1,24 +1,28 @@
 {% extends 'base.html' %}
 {% load humanize %}
 
-{% block content %}
+{% block header %}
+{% include 'ecapp/header.html' %}
+{% endblock %}
 
-<form action="{% url 'ecapp:index' %}" method="POST">{% csrf_token %}
-    {{ search_form.select }}
-    {{ search_form.keyword }}
-    <button type="submit">検索</button>
-</form>
+{% block content %}
 
 {% if 'my_products' in request.path %}
 <div #style="font-weight:bold; font-size: 28px; margin-bottom: 20px;">
     出品一覧
 </div>
-{% endif %}
 
-{% if 'fav_products' in request.path %}
+{% elif 'fav_products' in request.path %}
 <div #style="font-weight:bold; font-size: 28px; margin-bottom: 20px;">
     お気に入り商品
 </div>
+
+{% else %}
+<form action="{% url 'ecapp:index' %}" method="POST">{% csrf_token %}
+    {{ search_form.select }}
+    {{ search_form.keyword }}
+    <button type="submit">検索</button>
+</form>
 {% endif %}
 
 <div class="product-container">
@@ -33,6 +37,18 @@
         </div>
     </div>
     {% endfor %}
+</div>
+
+<div>
+    {% if products.has_previous %}
+    <a href="{% url 'ecapp:index' %}?page=1">&laquo;first</a>
+    <a href="{% url 'ecapp:index' %}?page={{ products.previous_page_number }}">&laquo;prev</a>
+    {% endif %}
+    <span>{{ products.number }}/{{ products.paginator.num_pages }}</span>
+    {% if products.has_next %}
+    <a href="{% url 'ecapp:index' %}?page={{ products.next_page_number }}">next&raquo;</a>
+    <a href="{% url 'ecapp:index' %}?page={{ products.paginator.num_pages }}">last&raquo;</a>
+    {% endif %}
 </div>
 
 {% endblock %}

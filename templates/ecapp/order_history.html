@@ -2,6 +2,10 @@
 {% load humanize %}
 {% load filters %}
 
+{% block header %}
+{% include 'ecapp/header.html' %}
+{% endblock %}
+
 {% block content %}
 
 <div class="order-history">
@@ -25,6 +29,18 @@
         </div>
     </div>
     {% endfor %}
+</div>
+
+<div>
+    {% if sales.has_previous %}
+    <a href="{% url 'ecapp:order_history' %}?page=1">&laquo;first</a>
+    <a href="{% url 'ecapp:order_history' %}?page={{ sales.previous_page_number }}">&laquo;prev</a>
+    {% endif %}
+    <span>{{ sales.number }}/{{ sales.paginator.num_pages }}</span>
+    {% if sales.has_next %}
+    <a href="{% url 'ecapp:order_history' %}?page={{ sales.next_page_number }}">next&raquo;</a>
+    <a href="{% url 'ecapp:order_history' %}?page={{ sales.paginator.num_pages }}">last&raquo;</a>
+    {% endif %}
 </div>
 
 {% endblock %}

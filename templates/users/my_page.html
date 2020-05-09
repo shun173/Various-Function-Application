@@ -31,13 +31,13 @@
     <span><a href="{% url 'users:questionnaire' %}">アンケートに答えてポイントゲット</a></span>
 </div>
 <div>
-    <a href="{% url 'users:friend_list' %}">友人一覧</a>
-    <a href="{% url 'snsapp:my_articles' %}">自身の投稿</a>
-    <a href="{% url 'ecapp:my_products' %}">自身の出品</a>
-    <a href="{% url 'ecapp:fav_products' %}">お気に入り</a>
-    <a href="{% url 'ecapp:cart' %}">カート</a>
-    <a href="{% url 'ecapp:order_history' %}">注文履歴</a>
-    <a href="{% url 'users:point_history' %}">ポイント履歴</a>
+    <a href="{% url 'users:friend_list' %}?page=1">友人一覧</a>
+    <a href="{% url 'snsapp:my_articles' %}?page=1">自身の投稿</a>
+    <a href="{% url 'ecapp:my_products' %}?page=1">自身の出品</a>
+    <a href="{% url 'ecapp:fav_products' %}?page=1">お気に入り</a>
+    <a href="{% url 'ecapp:cart' %}?page=1">カート</a>
+    <a href="{% url 'ecapp:order_history' %}?page=1">注文履歴</a>
+    <a href="{% url 'users:point_history' %}?page=1">ポイント履歴</a>
 </div>
 
 {% endblock %}

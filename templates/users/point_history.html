@@ -12,12 +12,25 @@
     </tr>
     {% for pf in point_fluctuations %}
     <tr>
-        <td>{{ pf.created_at }}</td>
+        <td>{{ pf.created_at　| date:"Y/m/d" }}</td>
         <td>{{ pf.event }}</td>
         <td>{{ pf.change | intcomma }}</td>
     </tr>
     {% endfor %}
 </table>
+
+<div>
+    {% if point_fluctuations.has_previous %}
+    <a href="{% url 'users:point_history' %}?page=1">&laquo;first</a>
+    <a href="{% url 'users:point_history' %}?page={{ point_fluctuations.previous_page_number }}">&laquo;prev</a>
+    {% endif %}
+    <span>{{ point_fluctuations.number }}/{{ point_fluctuations.paginator.num_pages }}</span>
+    {% if point_fluctuations.has_next %}
+    <a href="{% url 'users:point_history' %}?page={{ point_fluctuations.next_page_number }}">next&raquo;</a>
+    <a href="{% url 'users:point_history' %}?page={{ point_fluctuations.paginator.num_pages }}">last&raquo;</a>
+    {% endif %}
+</div>
+
 <h4>現在ポイント：{{ request.user.point | intcomma }}ポイント</h4>
 
 {% endblock %}
