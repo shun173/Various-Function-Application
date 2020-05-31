@@ -12,13 +12,13 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.contrib.auth import get_user_model
-#from django.contrib.auth.views import PasswordChangeView, PasswordChangeDoneView
+from django.contrib.auth.views import PasswordChangeView, PasswordChangeDoneView, PasswordResetView, PasswordResetDoneView, PasswordResetConfirmView, PasswordResetCompleteView
 #from django.contrib.auth.mixins import LoginRequiredMixin
-#from django.urls import reverse_lazy
+from django.urls import reverse_lazy
 from .models import Friend, PointFluctuation, Questionnaire
 from snsapp.models import Article
 from ecapp.models import Product
-from .forms import CustomUserCreationForm, QuestionnaireForm, ProfileForm
+from .forms import CustomUserCreationForm, MyPasswordChangeForm, MyPasswordResetForm, MySetPasswordForm, QuestionnaireForm, ProfileForm
 
 
 def index(request):
@@ -41,10 +41,13 @@ def edit_profile(request):
     user = request.user
     # プロフィールが更新されたとき
     if request.method == 'POST':
-        profile_form = ProfileForm(request.POST)
+        profile_form = ProfileForm(request.POST, request.FILES)
         if profile_form.is_valid():
             user.username = profile_form.cleaned_data['username']
             user.email = profile_form.cleaned_data['email']
+            user.message = profile_form.cleaned_data['message']
+            user.icon = profile_form.cleaned_data['icon']
+            print(user.icon)
             # 住所検索されたとき
             if 'search_address' in request.POST:
                 zip_code = request.POST['zip_code']
@@ -59,7 +62,7 @@ def edit_profile(request):
             user.save()
             return redirect('users:my_page')
     profile_form = ProfileForm(
-        initial={'username': user.username, 'email': user.email, 'address': user.address})
+        initial={'username': user.username, 'email': user.email, 'address': user.address, 'message': user.message, 'icon': user.icon})
     return render(request, 'users/edit_profile.html', {'profile_form': profile_form})
 
 
@@ -151,6 +154,50 @@ def signup(request):
     else:
         form = CustomUserCreationForm()
     return render(request, 'users/signup.html', {'form': form})
+
+
+class PasswordChange(PasswordChangeView):
+    """パスワード変更ビュー"""
+    form_class = MyPasswordChangeForm
+    success_url = reverse_lazy('users:password_change_done')
+    template_name = 'users/password_change.html'
+
+
+class PasswordChangeDone(PasswordChangeDoneView):
+    """パスワード変更後"""
+
+    def get(self, request):
+        messages.success(request, 'パスワードを変更しました')
+        return render(request, 'users/login.html')
+
+
+class PasswordReset(PasswordResetView):
+    """パスワード変更用URLの送付ページ"""
+    subject_template_name = 'users/mail_template/password_reset/subject.txt'
+    email_template_name = 'users/mail_template/password_reset/message.txt'
+    template_name = 'users/password_reset_form.html'
+    form_class = MyPasswordResetForm
+    success_url = reverse_lazy('users:password_reset_done')
+
+
+class PasswordResetDone(PasswordResetDoneView):
+    """パスワード変更用URLを送りましたページ"""
+    template_name = 'users/password_reset_done.html'
+
+
+class PasswordResetConfirm(PasswordResetConfirmView):
+    """新パスワード入力ページ"""
+    form_class = MySetPasswordForm
+    success_url = reverse_lazy('users:password_reset_complete')
+    template_name = 'users/password_reset_confirm.html'
+
+
+class PasswordResetComplete(PasswordResetCompleteView):
+    """新パスワード設定しましたページ"""
+
+    def get(self, request):
+        messages.success(request, 'パスワードを再設定しました')
+        return render(request, 'users/login.html')
 
 
 def get_address(zip_code):

@@ -3,18 +3,34 @@
 
 {% block content %}
 
+<h3 class="text-secondary">友人一覧</h3>
 {% for friend in friends %}
-<div>
-    <a href="{% url 'users:user_detail' friend.id %}">
-        {% if friend.icon %}
-        <img src="{{ friend.icon.url }}" alt="">
-        {% else %}
-        <img src="{% static 'default_icon.jpg' %}" alt="">
-        {% endif %}
-        <h3>{{ friend.username }}</h3>
-    </a>
-    <p>投稿数：{{ friend.article_set.count }}</p>
-    <p>出品数：{{ friend.product_set.count }}</p>
+<div class="card m-2 shadow-sm">
+    <div class="card-body row p-2">
+        <div class="col-3">
+            <a href="{% url 'users:user_detail' friend.id %}">
+                {% if friend.icon %}
+                <img class="img-thumbnail rounded-circle" src="{{ friend.icon.url }}" alt="">
+                {% else %}
+                <img class="img-thumbnail rounded-circle" src="{% static 'default_icon.jpg' %}" alt="">
+                {% endif %}
+            </a>
+        </div>
+        <div class="col-9">
+            <div class="row h-75">
+                <div class="col-4">
+                    <a class="h3" href="{% url 'users:user_detail' friend.id %}">{{ friend.username }}</a>
+                </div>
+                <div class="col-8">
+                    <p>投稿数：{{ friend.article_set.count }}</p>
+                    <p>出品数：{{ friend.product_set.count }}</p>
+                </div>
+            </div>
+            <div class="h-25">
+                <p>{{ friend.message }}</p>
+            </div>
+        </div>
+    </div>
 </div>
 {% endfor %}
 

@@ -6,8 +6,11 @@
 
 {% block content %}
 
-<h3>商品を出品</h3>
-<div>
+<div class="alert alert-danger">
+    <h3>商品を出品</h3>
+</div>
+
+<div class="container p-3">
     <form action="{% url 'ecapp:sell' %}" method="post" enctype="multipart/form-data">{% csrf_token %}
         <label>商品名</label>
         {{ sell_form.name }}
@@ -19,7 +22,7 @@
         {{ sell_form.amount }}
         <label>商品画像</label>
         {{ sell_form.image }}
-        <button type="submit">出品する</button>
+        <button class="btn btn-primary mt-3" type="submit">出品する</button>
     </form>
 </div>
 

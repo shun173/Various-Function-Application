@@ -1,72 +1,82 @@
 {% extends 'base.html' %}
 {% load humanize %}
 
-{% block header %}
-{% include 'ecapp/header.html' %}
-{% endblock %}
-
 {% block content %}
 
-<div class="product-detail">
-    <div class="product-detail-image">
-        <img src="{{ product.image.url }}" alt="" class="product-img">
-    </div>
-
-    <div class="product-detail-info">
-        <h2>{{ product.name }}</h2>
-        <p>出品者：　<a href="{% url 'users:user_detail' product.owner.id %}">{{ product.owner.username }}</a></p>
-        {% if product.awner == request.user %}
-        <form action="{% url 'ecapp:delete' product.id %}" method="post">{% csrf_token %}
-            <button type="submit" onclick="return confirm('本当に出品を取り消しますか？');">出品を取り消す</button>
-        </form>
-        <hr>
-        <div class="point-fav-section">
-            <h4>{{ product.price | intcomma }}ポイント</h4>
-            <p>在庫：　{{ product.amount }}個</p>
-            {% if request.user.is_authenticated %}
-            <form action="{% url 'ecapp:toggele_fav_product_status' %}" method="post">{% csrf_token %}
-                <input type="hidden" name="product_id" value="{{ product.id }}">
-                {% if product in request.user.fav_products.all %}
-                <input type="submit" name="submit" class="fav_button" value="お気に入りから外す">
+<div class="card">
+    <div class="row no-gutters">
+        <aside class="col-md-6 d-flex align-items-center">
+            <img class="img-lg d-block mx-auto" src="{{ product.image.url }}" alt="">
+        </aside>
+        <main class="col-md-6 border-left p-2">
+            <a href="{% url 'ecapp:toggle_fav_product_status' %}" class="float-right"><i class="far fa-heart"></i></a>
+            <article class="content-body">
+                <h1>{{ product.name }}</h1>
+                <div class="mb-3">
+                    <h4><var>{{ product.price | intcomma }}</var>point</h4>
+                </div>
+                <p>{{ product.description }}</p>
+                <p class="text-muted">在庫：　{{ product.amount }}個</p>
+                <hr>
+                <div class="point-fav-section">
+                    {% if request.user.is_authenticated %}
+                    <form action="{% url 'ecapp:toggle_fav_product_status' %}" method="post">{% csrf_token %}
+                        <input type="hidden" name="product_id" value="{{ product.id }}">
+                        {% if product in request.user.fav_products.all %}
+                        <input type="submit" name="submit" class="fav_button" value="お気に入りから外す">
+                        {% else %}
+                        <input type="submit" name="submit" class="fav_button" value="お気に入りに入れる">
+                        {% endif %}
+                    </form>
+                    {% endif %}
+                </div>
+                {% if request.user.is_authenticated %}
+                <form action="{% url 'ecapp:detail' product.id %}" method="post">{% csrf_token %}
+                    {{ add_to_cart_form.as_p }}
+                    <button type="submit" name="#" class="btn btn-primary"> 今すぐ購入 </button>
+                    <button type="submit" name="#" class="btn btn-outline-primary"> <span class="text">カートに入れる</span> <i
+                            class="fas fa-shopping-cart"></i>
+                    </button>
+                </form>
                 {% else %}
-                <input type="submit" name="submit" class="fav_button" value="お気に入りに入れる">
+                <a href="{% url 'users:login' %}?next={{ request.path }}">
+                    <button class="purchase-button">ログインして購入する</button>
+                </a>
                 {% endif %}
-            </form>
-            {% endif %}
-        </div>
-        <p>{{ product.description }}</p>
-
-        <div>
-            {% if request.user.is_authenticated %}
-            <form action="{% url 'ecapp:detail' product.id %}" method="post">{% csrf_token %}
-                {{ add_to_cart_form.as_p }}
-                <button type="submit" class="purchase-button">カートに追加する</button>
-            </form>
-            {% else %}
-            <a href="{% url 'users:login' %}?next={{ request.path }}">
-                <button class="purchase-button">ログインして購入する</button>
-            </a>
-            {% endif %}
-        </div>
+            </article>
+        </main>
     </div>
 </div>
-<div>
-    <h2>記事一覧</h2>
-    {% for article in product.article_set.all %}
-    <div>
-        <div>
-            <p>{{ article.content }}</p>
-        </div>
-        <div>
-            <span>{{ article.created_at }}</span>
-            <span>good{{ article.good_count }}コ</span>
-            <span>by {{ article.author.username }}</span>
-            <form action="" method="post">{% csrf_token %}
-                <input type="submit" name="good" value="good">
-            </form>
-        </div>
+
+<div class="container-fulid px-3 mb-5 mt-3">
+    <div class="container bg-info rounded-lg">
+        <h2 class="text-light d-inline-block ml-3 my-1">
+            {{ product.name }}<small>に関する記事</small>
+        </h2>
     </div>
-    {% endfor %}
+    <div class="container pt-3 border border-info rounded">
+        {% for article in product.article_set.all %}
+        <div class="media row mb-3 pb-3 border-bottom border-info">
+            <div class="media-body col-9 h-auto">
+
+                <p>{{ article.content }}</p>
+            </div>
+            <form action="{% url 'snsapp:good' article.pk %}" method="post">{% csrf_token %}
+                <input class="btn btn-primary" type="submit" name="good" value="good">
+            </form>
+            <p>good: <strong>{{ article.good_count }}</strong></p>
+            {% if article.author == request.user %}
+            <form action="{% url 'snsapp:delete' article.id %}" method="post">{% csrf_token %}
+                <button class="btn btn-danger" type="submit" onclick="return confirm('本当に削除しますか？');">削除</button>
+            </form>
+            {% endif %}
+            <div class="mt-auto">
+                <p class="font-italic d-inline">{{ article.created_at | date:"Y/m/d f" }}</p>
+                by<a href="{% url 'users:user_detail' article.author.id %}">{{ article.author.username }}</a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
 </div>
 
 {% endblock %}

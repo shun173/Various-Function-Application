@@ -25,7 +25,7 @@ SECRET_KEY = '0&7r^ijlk^qv2mdi!153=_tet)hxb29acoq$92*)@^f7lojs*g'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+# ALLOWED_HOSTS = ['localhost']
 
 
 # Application definition
@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_cleanup',
     'django.contrib.humanize',
+    'bootstrap4',
+    'rest_framework',
     'users',
     'ecapp',
     'snsapp',
@@ -151,3 +153,15 @@ EMAIL_HOST_PASSWORD = 'xbzsrvnramwsnxne'
 EMAIL_USE_TLS = True
 
 DEFAULT_FROM_EMAIL = 'juntailangdaojian4@gmail.com'
+
+# AUTHENTICATION_BACKENDS
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'users.backends.EmailAuthBackend',
+]
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10
+}

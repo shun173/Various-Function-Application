@@ -8,12 +8,15 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.contrib import messages
 from django.contrib.auth import get_user_model
+from rest_framework import viewsets
+from rest_framework import permissions
 from .forms import AddToCartForm, SellForm
 from users.models import Friend, PointFluctuation
 from users.forms import SearchForm, ProfileForm
 from users.views import get_address
 from snsapp.models import Article
 from .models import Product, Sale
+from .serializers import ProductSerializer
 
 
 def index(request):
@@ -61,7 +64,7 @@ def index(request):
     num = request.GET.get('page')
     if not num:
         num = 1
-    products = Paginator(products, 9)
+    products = Paginator(products, 12)
     products = products.get_page(num)
     context = {
         'search_form': search_form,
@@ -129,7 +132,7 @@ def fav_products(request):
     num = request.GET.get('page')
     if not num:
         num = 1
-    products = Paginator(products, 9)
+    products = Paginator(products, 12)
     products = products.get_page(num)
     return render(request, 'ecapp/index.html', {'products': products})
 
@@ -141,7 +144,7 @@ def my_products(request):
     num = request.GET.get('page')
     if not num:
         num = 1
-    products = Paginator(products, 9)
+    products = Paginator(products, 12)
     products = products.get_page(num)
     return render(request, 'ecapp/index.html', {'products': products})
 
@@ -303,3 +306,10 @@ def delete(request, product_id):
     product = Product.objects.get(id=product_id)
     product.delete()
     return redirect('ecapp:index')
+
+
+class ProductViewSet(viewsets.ModelViewSet):
+    """API endpoint that allows users to be viewed or edited."""
+    queryset = Product.objects.all().order_by('-created_at')
+    serializer_class = ProductSerializer
+    permission_classes = [permissions.IsAuthenticated]

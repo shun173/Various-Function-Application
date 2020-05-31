@@ -7,61 +7,79 @@
 {% block content %}
 
 {% if 'my_articles' in request.path %}
-<div #style="font-weight:bold; font-size: 28px; margin-bottom: 20px;">
-    自身の投稿
+<div class="alert alert-info">
+    <h3>自身の記事</h3>
 </div>
 
 {% elif 'good_articles' in request.path %}
-<div #style="font-weight:bold; font-size: 28px; margin-bottom: 20px;">
-    goodした投稿
+<div class="alert alert-info">
+    <h3>goodした記事</h3>
 </div>
 
 {% else %}
-<form action="{% url 'snsapp:index' %}" method="POST">{% csrf_token %}
-    {{ search_form.select }}
-    {{ search_form.keyword }}
-    <button type="submit">検索</button>
+<div class="alert alert-info">
+    <h3>SNS TOP</h3>
+</div>
+<form action="{% url 'snsapp:index' %}" method="POST" class="search mx-auto row">{% csrf_token %}
+    <div class="input-group col-lg-4 col-md-6 row ml-auto mr-4 mb-4">
+        <div class="col-3 p-0">
+            {{ search_form.select }}
+        </div>
+        <div class="col-8 p-0">
+            {{ search_form.keyword }}
+        </div>
+        <div class="input-group-append col-1 p-0">
+            <button class="btn btn-primary" type="submit">
+                <i class="fa fa-search"></i>
+            </button>
+        </div>
+    </div>
 </form>
 {% endif %}
 
-{% for article in articles %}
-<div>
-    <div>
-        <a href="{% url 'ecapp:detail_from_article' %}?product_id={{ article.product.id }}&article_id={{ article.id }}">
-            <img src="{{ article.product.image.url }}" alt="" class="product-img">
-            <span>{{ article.product.name }}</span>
+<div class="container pt-3 mb-5 border border-info rounded">
+    {% for article in articles %}
+    <div class="media row mb-3 border-bottom border-info p-1">
+        <a class="col-3"
+            href="{% url 'ecapp:detail_from_article' %}?product_id={{ article.product.id }}&article_id={{ article.id }}">
+            <img class="img-sm" src="{{ article.product.image.url }}" alt="" class="product-img">
         </a>
-    </div>
-    <div>
-        <p>{{ article.content }}</p>
-    </div>
-    {% if article.author == request.user %}
-    <form action="{% url 'snsapp:delete' article.id %}" method="post">{% csrf_token %}
-        <button type="submit" onclick="return confirm('本当に削除しますか？');">削除</button>
-    </form>
-    {% endif %}
-    <div>
-        <form action="{% url 'snsapp:good' article.pk %}" method="post">{% csrf_token %}
-            <input type="submit" name="good" value="good">
+        <div class="media-body col-9">
+            <a class="media-headig h4"
+                href="{% url 'ecapp:detail_from_article' %}?product_id={{ article.product.id }}&article_id={{ article.id }}">
+                {{ article.product.name }}
+            </a>
+            <p>{{ article.content }}</p>
+            <div>
+                <span class="font-italic">{{ article.created_at | date:"Y/m/d f" }}</span>
+                by<a href="{% url 'users:user_detail' article.author.id %}">{{ article.author.username }}</a>
+            </div>
+        </div>
+        <div id="article-good {{ article.id }}" data-href="{% url 'snsapp:good' article.pk %}">
+            <!-- <form id="article-good" action="{% url 'snsapp:good' article.pk %}" method="post">{% csrf_token %} -->
+            <i id="icon-{{ article.id }}" class="far fa-heart"></i>
+            <!-- <input class="btn btn-primary" type="submit" name="good" value="good"> -->
+            <span id="good-count-{{ article.id }}">{{ article.good_count }}</span>
+            <!-- </form> -->
+        </div>
+        {% if article.author == request.user %}
+        <form action="{% url 'snsapp:delete' article.id %}" method="post">{% csrf_token %}
+            <button class="btn btn-danger" type="submit" onclick="return confirm('本当に削除しますか？');">削除</button>
         </form>
-        <span>{{ article.created_at }}</span>
-        <span>good{{ article.good_count }}コ</span>
-        <span>by {{ article.author.username }}</span>
+        {% endif %}
+    </div>
+    {% endfor %}
+    <div>
+        {% if articles.has_previous %}
+        <a href="{% url 'snsapp:index' %}?page=1">&laquo;first</a>
+        <a href="{% url 'snsapp:index' %}?page={{ articles.previous_page_number }}">&laquo;prev</a>
+        {% endif %}
+        <span>{{ articles.number }}/{{ articles.paginator.num_pages }}</span>
+        {% if articles.has_next %}
+        <a href="{% url 'snsapp:index' %}?page={{ articles.next_page_number }}">next&raquo;</a>
+        <a href="{% url 'snsapp:index' %}?page={{ articles.paginator.num_pages }}">last&raquo;</a>
+        {% endif %}
     </div>
 </div>
-{% endfor %}
-
-<div>
-    {% if articles.has_previous %}
-    <a href="{% url 'snsapp:index' %}?page=1">&laquo;first</a>
-    <a href="{% url 'snsapp:index' %}?page={{ articles.previous_page_number }}">&laquo;prev</a>
-    {% endif %}
-    <span>{{ articles.number }}/{{ articles.paginator.num_pages }}</span>
-    {% if articles.has_next %}
-    <a href="{% url 'snsapp:index' %}?page={{ articles.next_page_number }}">next&raquo;</a>
-    <a href="{% url 'snsapp:index' %}?page={{ articles.paginator.num_pages }}">last&raquo;</a>
-    {% endif %}
-</div>
-
 
 {% endblock %}

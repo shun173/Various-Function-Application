@@ -1,15 +1,20 @@
 import re
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.core.paginator import Paginator
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from django.contrib.auth import get_user_model
 from django.contrib import messages
+from rest_framework import viewsets
+from rest_framework import permissions
+from rest_framework.response import Response
+from rest_framework.decorators import api_view
 from .models import Article, Good
 from .forms import ArticleForm
 from users.models import Friend, PointFluctuation
 from users.forms import SearchForm
 from ecapp.models import Product
+from .serializers import ArticleSerializer
 
 
 def index(request):
@@ -121,6 +126,46 @@ def delete(request, article_id):
     return redirect('snsapp:index')
 
 
+# @api_view(['GET'])
+# def good(request, pk):
+#     print('good')
+#     user = request.user
+#     article = get_object_or_404(Article, pk=pk)
+#     status = request.GET.getlist('status')
+#     status = int(status[0])
+#     good = Good.objects.filter(pusher=user).filter(article=article)
+#     if status == 0:
+#         if bool(good):
+#             liked = True
+#         else:
+#             liked = False
+#     else:
+#         if bool(good):
+#             article.good_count -= 1
+#             article.save()
+#             article.author.point -= 1
+#             article.author.save()
+#             PointFluctuation.objects.create(
+#                 user=article.author, event=f'記事"{article.content}"のgoodが外されました', change=-1)
+#             del good
+#             liked = False
+#         else:
+#             article.good_count += 1
+#             article.save()
+#             article.author.point += 1
+#             article.author.save()
+#             PointFluctuation.objects.create(
+#                 user=article.author, event=f'記事"{article.content}"にgoodが押されました', change=1)
+#             good = Good.objects.create(pusher=user, article=article)
+#             good.save()
+#             liked = True
+#     data = {
+#         'liked': liked,
+#         'pk': pk
+#     }
+#     return Response(data)
+
+
 @login_required
 def good(request, pk):
     user = request.user
@@ -151,3 +196,10 @@ def good(request, pk):
     good.save()
     messages.success(request, '記事にgoodしました')
     return redirect(f'{app}:index')
+
+
+class ArticleViewSet(viewsets.ModelViewSet):
+    """API endpoint that allows users to be viewed or edited."""
+    queryset = Article.objects.all().order_by('-created_at')
+    serializer_class = ArticleSerializer
+    permission_classes = [permissions.IsAuthenticated]

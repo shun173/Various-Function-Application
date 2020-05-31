@@ -25,3 +25,6 @@ class ArticleForm(forms.Form):
                                      for product in products],
             required=False
         )
+
+        for field in self.fields.values():
+            field.widget.attrs["class"] = "form-control"

@@ -1,40 +1,57 @@
 {% extends 'base.html' %}
 {% load humanize %}
 
-{% block header %}
-{% include 'ecapp/header.html' %}
-{% endblock %}
-
 {% block content %}
 
 {% if 'my_products' in request.path %}
-<div #style="font-weight:bold; font-size: 28px; margin-bottom: 20px;">
-    出品一覧
+<div class="alert alert-danger">
+    <h3>出品一覧</h3>
 </div>
 
 {% elif 'fav_products' in request.path %}
-<div #style="font-weight:bold; font-size: 28px; margin-bottom: 20px;">
-    お気に入り商品
+<div class="alert alert-danger">
+    <h3>お気に入り商品</h3>
 </div>
 
 {% else %}
-<form action="{% url 'ecapp:index' %}" method="POST">{% csrf_token %}
-    {{ search_form.select }}
-    {{ search_form.keyword }}
-    <button type="submit">検索</button>
+<div class="alert alert-danger">
+    <h3>EC TOP</h3>
+</div>
+<form action="{% url 'ecapp:index' %}" method="POST" class="search" class="mx-auto row">{% csrf_token %}
+    <div class="input-group col-lg-4 col-md-6 row ml-auto mr-4 mb-4">
+        <div class="col-3 p-0">
+            {{ search_form.select }}
+        </div>
+        <div class="col-8 p-0">
+            {{ search_form.keyword }}
+        </div>
+        <div class="input-group-append col-1 p-0">
+            <button class="btn btn-primary" type="submit">
+                <i class="fa fa-search"></i>
+            </button>
+        </div>
+    </div>
 </form>
 {% endif %}
 
-<div class="product-container">
+<div class="container-fluid row px-3">
     {% for product in products %}
-    <div class="product">
-        <a href="{% url 'ecapp:detail' product.id %}">
-            <img src="{{ product.image.url }}" alt="" class="product-img">
-        </a>
-        <div class="product-info">
-            <div class="product-name">{{ product.name }}</div>
-            <div class="product-price">Point: {{ product.price | intcomma }}</div>
-        </div>
+    <div class="col-lg-2 col-md-3 col-sm-6 mb-3">
+        <figure class="card card-product-grid h-100">
+            <span class="topbar">
+                <a href="{% url 'ecapp:toggle_fav_product_status' %}" class="float-right"><i
+                        class="far fa-heart"></i></a>
+            </span>
+            <div class="img-wrap align-items-center">
+                <a href="{% url 'ecapp:detail' product.id %}" class="d-block mx-auto">
+                    <img src="{{ product.image.url }}" class="img-ec d-block mx-auto mb-1"></a>
+            </div>
+            <figcaption class="info-wrap border-top">
+                <a href="{% url 'ecapp:detail' product.id %}" class="title">{{ product.name }}</a>
+                <small class="text-muted">在庫: {{ product.amount }}</small>
+                <div class="price mt-2">Point: {{ product.price | intcomma }}</div>
+            </figcaption>
+        </figure>
     </div>
     {% endfor %}
 </div>

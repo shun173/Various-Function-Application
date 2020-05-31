@@ -3,52 +3,71 @@
 
 {% block content %}
 
-<div>
-    <a href="{% url 'snsapp:index' %}?page=1">
-        <h2>SNSへ</h2>
-    </a>
-    {% for article in articles %}
-    <div>
-        <div>
-            <a
-                href="{% url 'ecapp:detail_from_article' %}?product_id={{ article.product.id }}&article_id={{ article.id }}">
-                <img src="{{ article.product.image.url }}" alt="" class="product-img">
-                <span>{{ article.product.name }}</span>
-            </a>
-        </div>
-        <div>
-            <p>{{ article.content }}</p>
-        </div>
-        <div>
-            <span>{{ article.created_at }}</span>
-            <span>good{{ article.good_count }}コ</span>
-            <span>by {{ article.author.username }}</span>
-            <form action="{% url 'snsapp:good' article.pk %}" method="post">{% csrf_token %}
-                <input type="submit" name="good" value="good">
-            </form>
-        </div>
+<div class="container-fluid px-3 mt-4 mb-5">
+    <div class="container bg-danger rounded-lg">
+        <a class="h2 text-light d-inline-block ml-3 my-1" href="{% url 'ecapp:index' %}?page=1">
+            EC
+        </a>
     </div>
-    {% endfor %}
-</div>
-<br>
-<div>
-    <a href="{% url 'ecapp:index' %}?page=1">
-        <h2>ECへ</h2>
-    </a>
-    <div class="product-container">
+    <div class="container pt-3 border border-danger rounded product_carousel owl-carousel owl-theme">
         {% for product in products %}
-        <div class="product">
-            <a href="{% url 'ecapp:detail' product.id %}">
-                <img src="{{ product.image.url }}" alt="" class="product-img">
+        <figure class="card card-product-grid">
+            <div class="img-wrap">
+                <span class="topbar">
+                    <a href="#" class="float-right"><i class="fa fa-heart"></i></a>
+                </span>
+                <span class="badge badge-danger"> New </span>
+                <img src="{{ product.image.url }}" class="img-fluid img-lg">
+            </div>
+            <figcaption class="info-wrap text-center border-top">
+                <a href="{% url 'ecapp:detail' product.id %}" class="title text-truncate">{{ product.name }}</a>
+                <div class="price mt-2">Point: {{ product.price | intcomma }}</div>
+                <small class="text-muted">在庫: {{ product.amount }}</small>
+            </figcaption>
+        </figure>
+        {% endfor %}
+    </div>
+</div>
+
+<div class="container-fulid px-3 mb-5">
+    <div class="container bg-info rounded-lg">
+        <a class="h2 text-light d-inline-block ml-3 my-1" href="{% url 'snsapp:index' %}?page=1">
+            SNS
+        </a>
+    </div>
+    <div class="container pt-3 border border-info rounded">
+        {% for article in articles %}
+        <div class="media row mb-3 pb-3 border-bottom border-info">
+            <div class="container-fluid col-3">
+                <a class="fluid"
+                    href="{% url 'ecapp:detail_from_article' %}?product_id={{ article.product.id }}&article_id={{ article.id }}">
+                    <img class="img-sm" src="{{ article.product.image.url }}" alt="">
+            </div>
             </a>
-            <div class="product-info">
-                <div class="product-name">{{ product.name }}</div>
-                <div class="product-price">Point: {{ product.price | intcomma }}</div>
-                <div>在庫：　{{ product.amount | intcomma }}個</div>
+            <div class="media-body col-9 h-auto">
+                <a class="media-headig h4"
+                    href="{% url 'ecapp:detail_from_article' %}?product_id={{ article.product.id }}&article_id={{ article.id }}">
+                    {{ article.product.name }}
+                </a>
+                <p>{{ article.content }}</p>
+            </div>
+            <form action="{% url 'snsapp:good' article.pk %}" method="post">{% csrf_token %}
+                <input class="btn btn-primary" type="submit" name="good" value="good">
+            </form>
+            <p>good: <strong>{{ article.good_count }}</strong></p>
+            {% if article.author == request.user %}
+            <form action="{% url 'snsapp:delete' article.id %}" method="post">{% csrf_token %}
+                <button class="btn btn-danger" type="submit" onclick="return confirm('本当に削除しますか？');">削除</button>
+            </form>
+            {% endif %}
+            <div class="mt-auto">
+                <p class="font-italic d-inline">{{ article.created_at | date:"Y/m/d f" }}</p>
+                by<a href="{% url 'users:user_detail' article.author.id %}">{{ article.author.username }}</a>
             </div>
         </div>
         {% endfor %}
     </div>
 </div>
+
 
 {% endblock %}
