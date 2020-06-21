@@ -17,12 +17,21 @@ from django.contrib import admin
 from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
+from rest_framework import routers
+from ecapp import views as ec_views
+from snsapp import views as sns_views
+
+
+router = routers.DefaultRouter()
+router.register('products', ec_views.ProductViewSet)
+router.register('articles', sns_views.ArticleViewSet)
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('users.urls')),
     path('ecapp/', include('ecapp.urls')),
     path('snsapp/', include('snsapp.urls')),
+    path('api/', include(router.urls)),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

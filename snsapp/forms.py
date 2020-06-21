@@ -9,8 +9,10 @@ class ArticleForm(forms.Form):
         widget=forms.Textarea(
             attrs={'placeholder': '商品の評価を投稿する場合は商品を選択してください'})
     )
+    evaluation = forms.IntegerField(required=False)
 
     def __init__(self, user_id, *args, **kwargs):
+        '''自身が購入した商品をproductフィールドの選択肢として設置'''
         super(ArticleForm, self).__init__(*args, **kwargs)
         user_model = get_user_model()
         user = user_model.objects.get(id=user_id)
@@ -25,3 +27,6 @@ class ArticleForm(forms.Form):
                                      for product in products],
             required=False
         )
+
+        for field in self.fields.values():
+            field.widget.attrs["class"] = "form-control"

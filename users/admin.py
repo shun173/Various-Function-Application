@@ -22,7 +22,7 @@ class MyUserCreationForm(UserCreationForm):
 class MyUserAdmin(UserAdmin):
     """カスタムユーザーモデルのAdmin"""
     fieldsets = (
-        (None, {'fields': ('email',  'password', 'icon',
+        (None, {'fields': ('email',  'password', 'message', 'icon',
                            'fav_products', 'point', 'continuous_login')}),
         (_('Personal info'), {
          'fields': ('username', 'address')}),

@@ -25,7 +25,7 @@ SECRET_KEY = '0&7r^ijlk^qv2mdi!153=_tet)hxb29acoq$92*)@^f7lojs*g'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+# ALLOWED_HOSTS = ['localhost']
 
 
 # Application definition
@@ -39,10 +39,19 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_cleanup',
     'django.contrib.humanize',
+    'bootstrap4',
+    'rest_framework',
+    'django_filters',
     'users',
     'ecapp',
     'snsapp',
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_FILTER_BACKENDS': ('django_filters.rest_framework.DjangoFilterBackend',),
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
+    'PAGE_SIZE': 10,
+}
 
 NUMBER_GROUPING = 3
 
@@ -131,7 +140,6 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 
 # About login
-
 LOGIN_URL = 'users:login'
 LOGIN_REDIRECT_URL = 'users:index'
 LOGOUT_REDIRECT_URL = 'users:index'
@@ -143,7 +151,6 @@ SESSION_SAVE_EVERY_REQUEST = True
 
 #　about mail
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-# EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_HOST_USER = 'juntailangdaojian4@gmail.com'
@@ -151,3 +158,9 @@ EMAIL_HOST_PASSWORD = 'xbzsrvnramwsnxne'
 EMAIL_USE_TLS = True
 
 DEFAULT_FROM_EMAIL = 'juntailangdaojian4@gmail.com'
+
+# AUTHENTICATION_BACKENDS
+AUTHENTICATION_BACKENDS = [
+    'django.contrib.auth.backends.ModelBackend',
+    'users.backends.EmailAuthBackend',
+]

@@ -41,10 +41,11 @@ class UserManager(BaseUserManager):
 class User(AbstractBaseUser, PermissionsMixin):
     """カスタムユーザーモデル"""
     initial_point = 50000
-    email = models.EmailField("メールアドレス", unique=True)
-    username = models.CharField("username", max_length=50)
-    address = models.CharField(max_length=100, blank=True)
-    icon = models.ImageField(upload_to='icons', blank=True)
+    email = models.EmailField("メールアドレス")
+    username = models.CharField("username", unique=True, max_length=50)
+    address = models.CharField(max_length=100, blank=True, null=True)
+    icon = models.ImageField(upload_to='icons', blank=True, null=True)
+    message = models.TextField(max_length=50, blank=True, null=True)
     point = models.PositiveIntegerField(default=initial_point)
     fav_products = models.ManyToManyField(Product, blank=True)
     is_staff = models.BooleanField("is_staff", default=False)
@@ -56,9 +57,9 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     objects = UserManager()
 
-    USERNAME_FIELD = "email"
+    USERNAME_FIELD = "username"
     EMAIL_FIELD = "email"
-    REQUIRED_FIELDS = ["username"]
+    REQUIRED_FIELDS = ["email"]
 
     class Meta:
         verbose_name = "user"
@@ -77,7 +78,7 @@ class Friend(models.Model):
     owner = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='friend_owner')
     friends = models.ForeignKey(User, on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
 
 class PointFluctuation(models.Model):
@@ -85,7 +86,7 @@ class PointFluctuation(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     event = models.CharField(max_length=100)
     change = models.IntegerField(default=0)
-    created_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
 
 class Questionnaire(models.Model):
@@ -93,4 +94,4 @@ class Questionnaire(models.Model):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     evaluation = models.IntegerField(default=3)
     content = models.TextField(max_length=200)
-    created_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)

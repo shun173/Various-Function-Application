@@ -11,11 +11,16 @@ class AddToCartForm(forms.Form):
             label='数量',
             min_value=0,
             max_value=amount,
-            required=True
+            required=True,
         )
 
 
 class SellForm(forms.ModelForm):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            field.widget.attrs["class"] = "form-control"
+
     class Meta:
         model = Product
         fields = ['name', 'description', 'price', 'amount', 'image']
