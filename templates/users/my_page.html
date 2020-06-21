@@ -49,10 +49,10 @@
             <a class="text-secondary" href="{% url 'ecapp:my_products' %}?page=1">自身の出品</a>
         </li>
         <li class="list-group-item text-center">
-            <a class="text-secondary" href="{% url 'ecapp:fav_products' %}?page=1">お気に入り</a>
+            <a class="text-secondary" href="{% url 'ecapp:fav_products' %}?page=1">お気に入り商品</a>
         </li>
         <li class="list-group-item text-center">
-            <a class="text-secondary" href="{% url 'ecapp:cart' %}?page=1">カート</a>
+            <a class="text-secondary" href="{% url 'ecapp:cart' 0 %}?page=1">カート</a>
         </li>
         <li class="list-group-item text-center">
             <a class="text-secondary" href="{% url 'ecapp:order_history' %}?page=1">注文履歴</a>

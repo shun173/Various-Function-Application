@@ -1,5 +1,4 @@
 from django.db import models
-from django.contrib.auth import get_user_model
 
 
 class Product(models.Model):
@@ -10,7 +9,7 @@ class Product(models.Model):
     amount = models.PositiveIntegerField(default=1)
     image = models.ImageField(upload_to='product')
     owner = models.ForeignKey('users.User', on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return self.name
@@ -22,4 +21,4 @@ class Sale(models.Model):
     user = models.ForeignKey('users.User', on_delete=models.PROTECT)
     amount = models.PositiveIntegerField(default=0)
     price = models.PositiveIntegerField("商品単価")
-    created_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)

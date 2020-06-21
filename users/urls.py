@@ -10,6 +10,7 @@ urlpatterns = [
     path('edit_profile/', views.edit_profile, name='edit_profile'),
     path('user_detail/<int:user_id>/', views.user_detail, name='user_detail'),
     path('friend_list/', views.friend_list, name='friend_list'),
+    path('add_friend/<int:user_id>', views.add_friend, name='add_friend'),
     path('point_history/', views.point_history, name='point_history'),
     path('questionnaire/', views.questionnaire, name='questionnaire'),
     path('signup/', views.signup, name='signup'),

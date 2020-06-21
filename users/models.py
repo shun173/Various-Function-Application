@@ -78,7 +78,7 @@ class Friend(models.Model):
     owner = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='friend_owner')
     friends = models.ForeignKey(User, on_delete=models.CASCADE)
-    created_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
 
 class PointFluctuation(models.Model):
@@ -86,7 +86,7 @@ class PointFluctuation(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     event = models.CharField(max_length=100)
     change = models.IntegerField(default=0)
-    created_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)
 
 
 class Questionnaire(models.Model):
@@ -94,4 +94,4 @@ class Questionnaire(models.Model):
     user = models.ForeignKey(User, on_delete=models.PROTECT)
     evaluation = models.IntegerField(default=3)
     content = models.TextField(max_length=200)
-    created_at = models.DateTimeField(auto_now=True)
+    created_at = models.DateTimeField(auto_now_add=True)

@@ -1,46 +1,56 @@
 {% extends 'base.html' %}
+{% load static %}
 {% load humanize %}
 
 {% block content %}
 
-<div class="card">
+<div class="card" id="product">
     <div class="row no-gutters">
         <aside class="col-md-6 d-flex align-items-center">
             <img class="img-lg d-block mx-auto" src="{{ product.image.url }}" alt="">
         </aside>
         <main class="col-md-6 border-left p-2">
-            <a href="{% url 'ecapp:toggle_fav_product_status' %}" class="float-right"><i class="far fa-heart"></i></a>
+            {% if product.owner == request.user %}
+            <form action="{% url 'ecapp:delete' product.id %}" method="post" class="float-right">
+                {% csrf_token %}
+                <button class="btn btn-danger" type="submit" onclick="return confirm('本当に削除しますか？');">削除</button>
+            </form>
+            {% endif %}
+            <product-good ref="{{ product.id }}" data-id="{{ product.id }}"
+                data-authenticated="{{ request.user.is_authenticated }}"></product-good>
+
             <article class="content-body">
-                <h1>{{ product.name }}</h1>
+                <h1 class="">{{ product.name }}</h1>
+                <ul style="list-style: none;" class="pl-0 my-2 d-inline-block">
+                    <li class="d-inline-block">
+                        <star-icon :eval="eval" data-id="1" data-eval="{{ evaluation }}"></star-icon>
+                        <star-icon :eval="eval" data-id="2" data-eval="{{ evaluation }}"></star-icon>
+                        <star-icon :eval="eval" data-id="3" data-eval="{{ evaluation }}"></star-icon>
+                        <star-icon :eval="eval" data-id="4" data-eval="{{ evaluation }}"></star-icon>
+                        <star-icon :eval="eval" data-id="5" data-eval="{{ evaluation }}"></star-icon>
+                    </li>
+                </ul>
+                <span class="small text-muted">(評価数: <strong>{{review_num}}</strong>)</span>
                 <div class="mb-3">
                     <h4><var>{{ product.price | intcomma }}</var>point</h4>
                 </div>
                 <p>{{ product.description }}</p>
-                <p class="text-muted">在庫：　{{ product.amount }}個</p>
+                <p class="text-muted d-inline-block mb-0">在庫：　{{ product.amount }}個</p>
+                <span class="float-right mr-2">出品者：<a
+                        href="{% url 'users:user_detail' product.owner.id %}">{{ product.owner.username }}</a>
+                </span>
                 <hr>
-                <div class="point-fav-section">
-                    {% if request.user.is_authenticated %}
-                    <form action="{% url 'ecapp:toggle_fav_product_status' %}" method="post">{% csrf_token %}
-                        <input type="hidden" name="product_id" value="{{ product.id }}">
-                        {% if product in request.user.fav_products.all %}
-                        <input type="submit" name="submit" class="fav_button" value="お気に入りから外す">
-                        {% else %}
-                        <input type="submit" name="submit" class="fav_button" value="お気に入りに入れる">
-                        {% endif %}
-                    </form>
-                    {% endif %}
-                </div>
                 {% if request.user.is_authenticated %}
                 <form action="{% url 'ecapp:detail' product.id %}" method="post">{% csrf_token %}
                     {{ add_to_cart_form.as_p }}
-                    <button type="submit" name="#" class="btn btn-primary"> 今すぐ購入 </button>
-                    <button type="submit" name="#" class="btn btn-outline-primary"> <span class="text">カートに入れる</span> <i
-                            class="fas fa-shopping-cart"></i>
+                    <button type="submit" name="buy_now" class="btn btn-primary"> 今すぐ購入 </button>
+                    <button type="submit" name="in_cart" class="btn btn-outline-primary"> <span
+                            class="text">カートに入れる</span> <i class="fas fa-shopping-cart"></i>
                     </button>
                 </form>
                 {% else %}
                 <a href="{% url 'users:login' %}?next={{ request.path }}">
-                    <button class="purchase-button">ログインして購入する</button>
+                    <button class="btn btn-primary">ログインして購入する</button>
                 </a>
                 {% endif %}
             </article>
@@ -54,29 +64,61 @@
             {{ product.name }}<small>に関する記事</small>
         </h2>
     </div>
-    <div class="container pt-3 border border-info rounded">
-        {% for article in product.article_set.all %}
-        <div class="media row mb-3 pb-3 border-bottom border-info">
-            <div class="media-body col-9 h-auto">
-
+    <div class="container pt-3 border border-info rounded" id=article>
+        {% if not articles %}
+        <h5 class="text-center font-weight-bold text-muted mb-4 mt-1">未投稿</h5>
+        {% else %}
+        {% for article in articles %}
+        <div class="media row mb-3 border-bottom border-info p-3 shadow-sm">
+            <div class="col-2"></div>
+            <div class="media-body col-10">
+                {% if article.author == request.user %}
+                <form action="{% url 'snsapp:delete' article.id %}" method="post" class="float-right ml-3">
+                    {% csrf_token %}
+                    <input type="hidden" name="product_id" value="{{ product.id }}">
+                    <input class="btn btn-outline-danger" type="submit" name="{{ ts }}"
+                        onclick="return confirm('本当に削除しますか？');" value="削除">
+                </form>
+                {% endif %}
                 <p>{{ article.content }}</p>
+                <ul style="list-style: none;" class="pl-0">
+                    <li class="d-inline-block">
+                        <star-icon :eval="eval" data-id="1" data-eval="{{ article.evaluation }}"></star-icon>
+                        <star-icon :eval="eval" data-id="2" data-eval="{{ article.evaluation }}"></star-icon>
+                        <star-icon :eval="eval" data-id="3" data-eval="{{ article.evaluation }}"></star-icon>
+                        <star-icon :eval="eval" data-id="4" data-eval="{{ article.evaluation }}"></star-icon>
+                        <star-icon :eval="eval" data-id="5" data-eval="{{ article.evaluation }}"></star-icon>
+                    </li>
+                </ul>
+                <div class="mt-auto float-right">
+                    <div class="d-flex align-items-end">
+                        <span class="font-italic mr-2">{{ article.created_at | date:"Y/m/d f" }}</span>
+                        by<a href="{% url 'users:user_detail' article.author.id %}">{{ article.author.username }}</a>
+                    </div>
+                </div>
             </div>
-            <form action="{% url 'snsapp:good' article.pk %}" method="post">{% csrf_token %}
-                <input class="btn btn-primary" type="submit" name="good" value="good">
-            </form>
-            <p>good: <strong>{{ article.good_count }}</strong></p>
-            {% if article.author == request.user %}
-            <form action="{% url 'snsapp:delete' article.id %}" method="post">{% csrf_token %}
-                <button class="btn btn-danger" type="submit" onclick="return confirm('本当に削除しますか？');">削除</button>
-            </form>
-            {% endif %}
-            <div class="mt-auto">
-                <p class="font-italic d-inline">{{ article.created_at | date:"Y/m/d f" }}</p>
-                by<a href="{% url 'users:user_detail' article.author.id %}">{{ article.author.username }}</a>
-            </div>
+            <article-good id="good" ref="{{ article.id }}" data-id="{{ article.id }}"
+                data-count="{{ article.good_count }}" data-authenticated="{{ request.user.is_authenticated }}">
+            </article-good>
         </div>
         {% endfor %}
+        <div class="text-center mb-2">
+            <a href="{% url 'ecapp:detail' product.id %}?articles={{ article_num }}">
+                <button class="border border-0 bg-white"><i class="fas fa-angle-double-down fa-3x"
+                        style="color: darkcyan;"></i></button></a>
+        </div>
+        {% endif %}
     </div>
 </div>
 
+{% endblock %}
+
+{% block script %}
+<script type="text/javascript" src="https://kit.fontawesome.com/c25d00f6dc.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/vue"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/js-cookie@2/src/js.cookie.min.js"></script>
+<script type="text/javascript" src="{% static 'js/display_eval.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/product.js' %}"></script>
+<script type="text/javascript" src="{% static 'js/article.js' %}"></script>
 {% endblock %}

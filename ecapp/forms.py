@@ -11,7 +11,7 @@ class AddToCartForm(forms.Form):
             label='数量',
             min_value=0,
             max_value=amount,
-            required=True
+            required=True,
         )
 
 
