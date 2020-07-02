@@ -91,8 +91,12 @@ WSGI_APPLICATION = 'portfolio.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'portfolio_db',
+        'USER': 'root',
+        'PASSWORD': 'ryohusoni',
+        'HOST': '127.0.0.1',
+        'PORT': '3306',
     }
 }
 
@@ -134,6 +138,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
 STATIC_URL = '/static/'
+#STATIC_ROOT = '/static/'
 STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
@@ -144,12 +149,11 @@ LOGIN_URL = 'users:login'
 LOGIN_REDIRECT_URL = 'users:index'
 LOGOUT_REDIRECT_URL = 'users:index'
 
-
 AUTH_USER_MODEL = 'users.User'
 
 SESSION_SAVE_EVERY_REQUEST = True
 
-#　about mail
+# About mail
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587

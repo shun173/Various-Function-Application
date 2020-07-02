@@ -35,9 +35,9 @@
 </form>
 {% endif %}
 
-<div class="container-fluid row px-3 pb-5 mx-auto" id="product">
+<div class="container-fluid row px-0 pb-5 mx-auto" id="product">
     {% for product in products %}
-    <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 mb-3">
+    <div class="col-xl-2 col-lg-3 col-md-4 col-sm-6 mb-3 px-0">
         <figure class="card card-product-grid shadow-sm">
             <span class="topbar">
                 <product-good ref="{{ product.id }}" data-id="{{ product.id }}"

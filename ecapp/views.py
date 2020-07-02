@@ -194,6 +194,7 @@ def detail_from_article(request):
 
 class WheatherFavNew(APIView):
     '''お気に入り商品と一週間以内に出品された商品のIDを返す'''
+
     def get(self, request):
         fav_ids = []
         new_ids = []
@@ -352,7 +353,7 @@ def cart(request, bina):
 @login_required
 @require_POST
 def change_item_amount(request, bina):
-    '''カートに入っている商品の個数を変える'''
+    '''カートに入っている商品の個数を変更'''
     product_id = request.POST["product_id"]
     product_id = str(product_id)
     if bina == 0:

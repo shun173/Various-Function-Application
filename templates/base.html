@@ -72,7 +72,7 @@
 
     <div class="container-fluid">
         {% for message in messages %}
-        <p class="alert alert-{{ message.tags }}">{{ message }}</p>
+        <p class="alert alert-{{ message.tags }} text-center">{{ message }}</p>
         {% endfor %}
         {% block content %}{% endblock %}
     </div>
