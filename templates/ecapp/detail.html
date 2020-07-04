@@ -65,12 +65,6 @@
                                             <button type="submit" name="product" value="{{ recommend_product.id }}"
                                                 class="btn btn-link">
                                                 <div class="img-wrap">
-                                                    <span class="topbar">
-                                                        <product-good ref="{{ recommend_product.id }}"
-                                                            data-id="{{ recommend_product.id }}"
-                                                            data-authenticated="{{ request.user.is_authenticated }}">
-                                                        </product-good>
-                                                    </span>
                                                     <a href="{% url 'ecapp:detail' recommend_product.id %}">
                                                         <img src="{{ recommend_product.image.url }}"
                                                             class="img-fluid img-lg"></a>
