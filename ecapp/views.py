@@ -2,6 +2,7 @@ import re
 import json
 import requests
 import datetime
+import collections
 from django.conf import settings
 from django.shortcuts import get_object_or_404, render, redirect
 from django.core.paginator import Paginator
@@ -109,7 +110,8 @@ def my_products(request):
 
 
 def detail(request, product_id):
-    '''商品のIDを受けとって商品詳細ページを返す'''
+    '''get:商品詳細ページを表示　post:商品をカートに入れ、カートページを表示
+    {product_id:商品ID}'''
     product = get_object_or_404(Product, pk=product_id)
     if request.method == 'POST':
         num = request.POST['num']
@@ -117,8 +119,21 @@ def detail(request, product_id):
         if num == 0:
             messages.warning(request, '個数を選択してください')
             return redirect('ecapp:detail', product_id=product_id)
-        # カートに追加されたとき
-        if 'in_cart' in request.POST:
+        # 今すぐ購入が押されたとき
+        if 'buy_now' in request.POST:
+            cart_products = {product: num}
+            purchase_form = ProfileForm(request.POST, None)
+            total_price = product.price * num
+            request.session['instant_cart'] = {str(product_id): num}
+            context = {
+                'purchase_form': purchase_form,
+                'cart_products': cart_products,
+                'total_price': total_price,
+                'which_cart': 1,
+            }
+            return render(request, 'ecapp/cart.html', context)
+        # カートに入れるが押された時
+        else:
             if 'cart' in request.session:
                 if str(product_id) in request.session['cart']:
                     request.session['cart'][str(product_id)] += num
@@ -127,20 +142,16 @@ def detail(request, product_id):
             else:
                 request.session['cart'] = {str(product_id): num}
             messages.success(request, f"{product.name}を{num}個カートに入れました！")
-            return redirect('ecapp:cart', bina=0)
-        # 今すぐ購入されたとき
-        elif 'buy_now' in request.POST:
-            cart_products = {product: num}
-            purchase_form = ProfileForm(request.POST, None)
-            total_price = product.price * num
-            request.session['instance_cart'] = {str(product_id): num}
-            context = {
-                'purchase_form': purchase_form,
-                'cart_products': cart_products,
-                'total_price': total_price,
-                'bina': 1,
-            }
-            return render(request, 'ecapp/cart.html', context)
+            # カートへが押された時
+            if 'in_cart' in request.POST:
+                return redirect('ecapp:cart', which_cart=0)
+            # 買い物を続けるが押された時
+            elif 'go_on' in request.POST:
+                return redirect('ecapp:index')
+            # リコメンド商品が押された時
+            elif 'product' in request.POST:
+                next_product_id = request.POST['product']
+                return redirect('ecapp:detail', product_id=next_product_id)
     else:
         # 商品の評価記事と平均評価、評価数を取り出す
         articles = product.article_set.all().order_by('-created_at')
@@ -148,12 +159,13 @@ def detail(request, product_id):
             total = 0
             for article in articles:
                 total += article.evaluation
-            mean = total / len(articles)
-            mean_eval = round(mean)
             review_num = len(articles)
+            mean = total / review_num
+            mean_eval = round(mean)
         else:
             mean_eval = 0
             review_num = 0
+        # 表示する記事数の処理
         # param {articles:現在表示している記事数}
         article_num = request.GET.get('articles')
         if not article_num:
@@ -164,7 +176,25 @@ def detail(request, product_id):
         else:
             article_num += 10
             articles = articles[:article_num]
-            article_num = len(articles)
+        # リコメンドする商品
+        # 同商品を買ったユーザーが買った別商品（多い順に３つ、同数の時は購入日付が近いもの）
+        rel_products = []
+        self_sales = Sale.objects.filter(
+            product=product).order_by('-created_at')
+        for self_sale in self_sales:
+            user = self_sale.user
+            sales = Sale.objects.filter(user=user)
+            for sale in sales:
+                recommend_product = sale.product
+                if recommend_product.id == product_id:
+                    continue
+                rel_products.append(recommend_product)
+        recommend_products = []
+        recommend_products_col = collections.Counter(
+            rel_products).most_common(3)
+        for recommend_product in recommend_products_col:
+            recommend_products.append(recommend_product[0])
+
         add_to_cart_form = AddToCartForm(product_id=product_id)
         context = {
             'product': product,
@@ -172,8 +202,9 @@ def detail(request, product_id):
             'evaluation': mean_eval,
             'review_num': review_num,
             'article_num': article_num,
+            'recommend_products': recommend_products,
             'add_to_cart_form': add_to_cart_form,
-            'ts': 'product',
+            'next': 'product',
         }
     return render(request, 'ecapp/detail.html', context)
 
@@ -235,13 +266,14 @@ class ToggleFav(APIView):
 
 
 @login_required
-def cart(request, bina):
-    '''get:カートページを表示　post:購入処理'''
+def cart(request, which_cart):
+    '''get:カートページを表示　post:購入処理
+    {which_cart:0→カートセッション、1→インスタントカートセッション}'''
     user = request.user
-    if bina == 0:
+    if which_cart == 0:
         cart = request.session.get('cart', {})
     else:
-        cart = request.session.get('instance_cart', {})
+        cart = request.session.get('instant_cart', {})
     cart_products = dict()
     total_price = 0
     for product_id, num in cart.items():
@@ -257,27 +289,27 @@ def cart(request, bina):
             address = get_address(zip_code)
             if not address:
                 messages.warning(request, '住所を取得できませんでした。')
-                return redirect('ecapp:cart', bina=bina)
+                return redirect('ecapp:cart', which_cart=which_cart)
             purchase_form = ProfileForm(
                 initial={'zip_code': zip_code, 'address': address})
         # 購入ボタンが押された場合
         if 'buy_product' in request.POST:
             if not bool(cart):
                 messages.warning(request, "カートは空です。")
-                return redirect('ecapp:cart', bina=bina)
+                return redirect('ecapp:cart', which_cart=which_cart)
             if total_price > user.point:
                 messages.warning(request, "所持ポイントが足りません。")
-                return redirect('ecapp:cart', bina=bina)
+                return redirect('ecapp:cart', which_cart=which_cart)
             for product_id in cart:
                 product = Product.objects.get(pk=product_id)
                 if product.owner == user:
                     messages.warning(request, "自身が出品した商品は購入できません。")
-                    return redirect('ecapp:cart', bina=bina)
+                    return redirect('ecapp:cart', which_cart=which_cart)
             if not user.address:
                 address = request.POST['address']
                 if not address:
                     messages.warning(request, "住所の入力は必須です。")
-                    return redirect('ecapp:cart', bina=bina)
+                    return redirect('ecapp:cart', which_cart=which_cart)
                 user.address = address
                 user.save()
 
@@ -312,6 +344,7 @@ def cart(request, bina):
                 owner.email_user(
                     subject=subject, message=message, from_email=from_email)
                 # 紹介記事のリンクから購入された商品の場合、紹介者にもポイント付与
+                # request.session['product_from_article]=={str(product_id): str(article_id)}
                 products = request.session.get('product_from_article')
                 if products:
                     if product_id in products:
@@ -325,13 +358,13 @@ def cart(request, bina):
                             product_id)]
             user.point -= total_price
             user.save()
-            if bina == 0:
+            if which_cart == 0:
                 del request.session['cart']
             else:
-                del request.session['instance_cart']
+                del request.session['instant_cart']
             messages.success(request, "商品の購入が完了しました！")
-            return redirect('ecapp:cart', bina=bina)
-
+            return redirect('ecapp:cart', which_cart=which_cart)
+    # ページ処理
     num = request.GET.get('page')
     if not num:
         num = 1
@@ -345,21 +378,22 @@ def cart(request, bina):
         'cart_products': cart_products,
         'total_price': total_price,
         'products': products,
-        'bina': bina,
+        'which_cart': which_cart,
     }
     return render(request, 'ecapp/cart.html', context)
 
 
 @login_required
 @require_POST
-def change_item_amount(request, bina):
-    '''カートに入っている商品の個数を変更'''
+def change_item_amount(request, which_cart):
+    '''カートに入っている商品の個数を変更
+    {which_cart:0→カートセッション、1→インスタントカートセッション}'''
     product_id = request.POST["product_id"]
     product_id = str(product_id)
-    if bina == 0:
+    if which_cart == 0:
         cart_session = request.session['cart']
     else:
-        cart_session = request.session['instance_cart']
+        cart_session = request.session['instant_cart']
     if product_id in cart_session:
         if 'action_remove' in request.POST:
             cart_session[product_id] -= 1
@@ -371,21 +405,23 @@ def change_item_amount(request, bina):
                 messages.warning(request, '在庫数をご確認ください。')
         if cart_session[product_id] <= 0:
             del cart_session[product_id]
-    return redirect('ecapp:cart', bina=bina)
+    return redirect('ecapp:cart', which_cart=which_cart)
 
 
 @login_required
 @require_POST
-def delete_cart_product(request, bina, product_id):
-    '''カートに入っている商品をカートから削除'''
-    if bina == 0:
+def delete_cart_product(request, which_cart, product_id):
+    '''カートに入っている商品をカートから削除
+    {which_cart:0→カートセッション、1→インスタントカートセッション,
+    product_id:商品ID}'''
+    if which_cart == 0:
         cart_session = request.session['cart']
         product_id = str(product_id)
         if product_id in cart_session:
             del cart_session[product_id]
     else:
-        del request.session['instance_cart']
-    return redirect('ecapp:cart', bina=0)
+        del request.session['instant_cart']
+    return redirect('ecapp:cart', which_cart=0)
 
 
 @login_required
@@ -421,7 +457,8 @@ def sell(request):
 @login_required
 @require_POST
 def delete(request, product_id):
-    '''自身の商品の出品を取り消す'''
+    '''自身の商品の出品を取り消す
+    {product_id:商品ID}'''
     product = Product.objects.get(id=product_id)
     product.delete()
     return redirect('ecapp:my_products')

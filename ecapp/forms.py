@@ -9,7 +9,8 @@ class AddToCartForm(forms.Form):
         amount = product.amount
         self.fields['num'] = forms.IntegerField(
             label='数量',
-            min_value=0,
+            initial=1,
+            min_value=1,
             max_value=amount,
             required=True,
         )
