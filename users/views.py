@@ -39,7 +39,7 @@ def index(request):
         'products': products,
         'articles': articles,
         'article_num': article_num,
-        'ts': 'top',
+        'next': 'top',
     }
     return render(request, 'users/index.html', context)
 
@@ -109,7 +109,7 @@ def user_detail(request, user_id):
         'articles': articles,
         'is_friend': is_friend,
         'article_num': article_num,
-        'ts': 'user',
+        'next': 'user',
     }
     return render(request, 'users/user_detail.html', context)
 

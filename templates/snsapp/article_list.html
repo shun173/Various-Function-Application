@@ -24,8 +24,8 @@
         {% if article.author == request.user %}
         <form action="{% url 'snsapp:delete' article.id %}" method="post" class="d-inline ml-3">
             {% csrf_token %}
-            <input class="btn btn-outline-danger" type="submit" name="{{ ts }}" onclick="return confirm('本当に削除しますか？');"
-                value="削除">
+            <input class="btn btn-outline-danger" type="submit" next="{{ next }}"
+                onclick="return confirm('本当に削除しますか？');" value="削除">
         </form>
         {% endif %}
         {% if article.evaluation %}

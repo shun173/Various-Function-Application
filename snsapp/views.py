@@ -76,7 +76,7 @@ def index(request):
     context = {
         'search_form': search_form,
         'articles': articles,
-        'ts': 'sns',
+        'next': 'sns',
     }
     return render(request, 'snsapp/index.html', context)
 
@@ -133,7 +133,7 @@ def post_article(request):
 @login_required
 @require_POST
 def delete(request, article_id):
-    '''自身の記事を削除'''
+    '''自身の記事を削除し、元のページを表示'''
     article = Article.objects.get(id=article_id)
     article.delete()
     if 'top' in request.POST:

@@ -5,7 +5,7 @@
 {% block content %}
 
 <div class="alert alert-danger">
-    {% if bina == 0 %}
+    {% if which_cart == 0 %}
     <h3>カート</h3>
     {% else %}
     <h3>カート外から購入</h3>
@@ -44,7 +44,8 @@
                                 </figure>
                             </td>
                             <td>
-                                <form action="{% url 'ecapp:change_item_amount' bina %}" method="post">{% csrf_token %}
+                                <form action="{% url 'ecapp:change_item_amount' which_cart %}" method="post">
+                                    {% csrf_token %}
                                     <div class="input-group">
                                         <input type="hidden" name="product_id" value="{{ product.id }}">
                                         <input type="submit" name="action_remove" value="-"
@@ -63,7 +64,8 @@
                                 </div>
                             </td>
                             <td class="text-right d-none d-md-block">
-                                <form action="{% url 'ecapp:delete_cart_product' bina product.id %}" method="POST">
+                                <form action="{% url 'ecapp:delete_cart_product' which_cart product.id %}"
+                                    method="POST">
                                     {% csrf_token %}
                                     <input type="submit" value="削除" class="btn btn-danger">
                                 </form>
@@ -78,7 +80,7 @@
     <aside class="col-lg-3">
         <div class="card">
             <div class="card-body pb-0">
-                <form action="{% url 'ecapp:cart' bina %}" method="post">{% csrf_token %}
+                <form action="{% url 'ecapp:cart' which_cart %}" method="post">{% csrf_token %}
                     {% if request.user.address %}
                     <p><strong class="text-muted">{{ request.user.address }}</strong> にお届け</p>
                     {% else %}
