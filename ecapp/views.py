@@ -68,7 +68,7 @@ def index(request):
             if not keyword:
                 products = searched_products
         else:
-            messages.warning('無効な検索です')
+            messages.warning(request, '無効な検索です')
             return redirect('ecapp:index')
 
     num = request.GET.get('page')
@@ -439,6 +439,8 @@ def order_history(request):
 def sell(request):
     '''get:出品ページを表示　post:出品処理'''
     if request.method == 'POST':
+        print(request)
+        print(request.post)
         sell_form = SellForm(request.POST, request.FILES)
         if sell_form.is_valid():
             product = sell_form.save(commit=False)
