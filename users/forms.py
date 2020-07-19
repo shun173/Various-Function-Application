@@ -63,7 +63,7 @@ class EmailAuthenticationForm(forms.Form):
 class CustomUserCreationForm(UserCreationForm):
     class Meta:
         model = get_user_model()
-        fields = ('email', 'username')
+        fields = ('email', 'name')
 
 
 class MyPasswordChangeForm(PasswordChangeForm):
@@ -94,7 +94,7 @@ class MySetPasswordForm(SetPasswordForm):
 
 
 class ProfileForm(forms.Form):
-    username = forms.CharField(
+    name = forms.CharField(
         label='ユーザー名',
         max_length=20,
     )

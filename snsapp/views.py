@@ -51,7 +51,7 @@ def index(request):
             if keyword:
                 articles = []
                 for article in searched_articles:
-                    author = article.author.username
+                    author = article.author.name
                     content = article.content
                     product = article.product
                     if product:
@@ -62,8 +62,10 @@ def index(request):
                     text = ' '.join(text_list)
                     if re.findall(keyword, text, re.IGNORECASE):
                         articles.append(article)
+                messages.success(request, f'"{keyword}"の検索結果（{select}）')
             if not keyword:
                 articles = searched_articles
+                messages.success(request, f'絞り込み（{select}）')
         else:
             messages.warning(request, '無効な検索です')
             return redirect('snsapp:index')

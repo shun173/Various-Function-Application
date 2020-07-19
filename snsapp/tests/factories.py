@@ -4,7 +4,9 @@ import datetime
 
 from django.contrib.auth import get_user_model
 
-from ..models import Product
+from ..models import Article
+from ecapp.models import Product
+from ecapp.tests.factories import ProductFactory
 
 
 class UserFactory(factory.django.DjangoModelFactory):
@@ -21,14 +23,11 @@ class UserFactory(factory.django.DjangoModelFactory):
     last_login_date = datetime.date.today()
 
 
-class ProductFactory(factory.django.DjangoModelFactory):
+class ArticleFactory(factory.django.DjangoModelFactory):
     class Meta:
-        model = Product
+        model = Article
 
-    name = factory.Faker('word')
-    description = factory.Faker('text')
-    price = random.randint(1, 100)
-    amount = random.randint(1, 100)
-    image = factory.Faker('image_url')
-    owner = factory.SubFactory(UserFactory)
-    created_at = str(factory.Faker('date_time'))
+    author = factory.SubFactory(UserFactory)
+    content = factory.Faker('text')
+    product = factory.SubFactory(ProductFactory)
+    evaluation = random.randint(1, 5)

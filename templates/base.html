@@ -51,7 +51,7 @@
                         <img class="dropdown-item rounded-circle img-md mx-auto px-1"
                             src="{% static 'default_icon.jpg' %}" alt="">
                         {% endif %}
-                        <p class="dropdown-item disabled m-0">{{ request.user.username }}</p>
+                        <p class="dropdown-item disabled m-0">{{ request.user.name }}</p>
                         <p class="dropdown-item disabled m-0">Point: {{ request.user.point | intcomma }}</p>
                         <a class="dropdown-item" href="{% url 'users:my_page' %}">My Page</a>
                         <div class="dropdown-divider"></div>

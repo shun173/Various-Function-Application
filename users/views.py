@@ -58,7 +58,7 @@ def edit_profile(request):
     if request.method == 'POST':
         profile_form = ProfileForm(request.POST, request.FILES)
         if profile_form.is_valid():
-            user.username = profile_form.cleaned_data['username']
+            user.name = profile_form.cleaned_data['name']
             user.email = profile_form.cleaned_data['email']
             user.message = profile_form.cleaned_data['message']
             user.icon = profile_form.cleaned_data['icon']
@@ -67,7 +67,7 @@ def edit_profile(request):
                 zip_code = request.POST['zip_code']
                 address = get_address(zip_code)
                 profile_form = ProfileForm(
-                    initial={'username': user.username, 'email': user.email, 'zip_code': zip_code, 'address': address})
+                    initial={'name': user.name, 'email': user.email, 'zip_code': zip_code, 'address': address})
                 if not address:
                     messages.warning(request, "住所を取得できませんでした")
                     return redirect('users:edit_profile')
@@ -79,7 +79,7 @@ def edit_profile(request):
             messages.warning(request, '必須項目が入力されていません')
             return render(request, 'users/edit_profile.html', {'profile_form': profile_form})
     profile_form = ProfileForm(
-        initial={'username': user.username, 'email': user.email, 'address': user.address, 'message': user.message, 'icon': user.icon})
+        initial={'name': user.name, 'email': user.email, 'address': user.address, 'message': user.message, 'icon': user.icon})
     return render(request, 'users/edit_profile.html', {'profile_form': profile_form})
 
 
@@ -197,7 +197,7 @@ def signup(request):
     '''get:新規登録ページを表示　post:新規登録処理'''
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
-        if form.is_valid:
+        if form.is_valid():
             new_user = form.save()
             input_email = form.cleaned_data['email']
             input_password = form.cleaned_data['password1']
@@ -206,6 +206,8 @@ def signup(request):
             if new_user is not None:
                 login(request, new_user)
                 return redirect('users:index')
+        else:
+            messages.warning(request, '無効な値が入力されました')
     else:
         form = CustomUserCreationForm()
     return render(request, 'users/signup.html', {'form': form})
@@ -288,7 +290,7 @@ def user_loged_in_callback(sender, request, user, **kwargs):
             message = 'お帰りなさい'
         add_point = 100 * user.continuous_login
         messages.success(
-            request, f'{user.username}さん、{message}。{user.continuous_login}日連続ログインボーナス：{add_point}ポイント 贈呈')
+            request, f'{user.name}さん、{message}。{user.continuous_login}日連続ログインボーナス：{add_point}ポイント 贈呈')
         user.point += add_point
         user.save()
         PointFluctuation.objects.create(

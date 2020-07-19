@@ -12,37 +12,37 @@ class UserManager(BaseUserManager):
     """カスタムユーザーマネージャー"""
     use_in_migrations = True
 
-    def _create_user(self, email, username, password, **extra_fields):
+    def _create_user(self, email, name, password, **extra_fields):
         if not email:
             raise ValueError('The given email must be set')
-        if not username:
-            raise ValueError('The given username must be set')
+        if not name:
+            raise ValueError('The given name must be set')
         email = self.normalize_email(email)
-        user = self.model(email=email, username=username, **extra_fields)
+        user = self.model(email=email, name=name, **extra_fields)
         user.set_password(password)
         user.save(using=self.db)
         return user
 
-    def create_user(self, email, username, password=None, **extra_fields):
+    def create_user(self, email, name, password=None, **extra_fields):
         extra_fields.setdefault('is_staff', False)
         extra_fields.setdefault('is_superuser', False)
-        return self._create_user(email, username, password, **extra_fields)
+        return self._create_user(email, name, password, **extra_fields)
 
-    def create_superuser(self, email, username, password, **extra_fields):
+    def create_superuser(self, email, name, password, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
         if extra_fields.get('is_staff') is not True:
             raise ValueError('Superuser must have is_staff=True.')
         if extra_fields.get('is_superuser') is not True:
             raise ValueError('Superuser must have is_superuser=True.')
-        return self._create_user(email, username, password, **extra_fields)
+        return self._create_user(email, name, password, **extra_fields)
 
 
 class User(AbstractBaseUser, PermissionsMixin):
     """カスタムユーザーモデル"""
     initial_point = 50000
-    email = models.EmailField("メールアドレス")
-    username = models.CharField("username", unique=True, max_length=50)
+    email = models.EmailField("メールアドレス", unique=True)
+    name = models.CharField("ユーザー名", max_length=50)
     address = models.CharField(max_length=100, blank=True, null=True)
     icon = models.ImageField(upload_to='icons', blank=True, null=True)
     message = models.TextField(max_length=50, blank=True, null=True)
@@ -57,9 +57,9 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     objects = UserManager()
 
-    USERNAME_FIELD = "username"
+    USERNAME_FIELD = "email"
     EMAIL_FIELD = "email"
-    REQUIRED_FIELDS = ["email"]
+    REQUIRED_FIELDS = ['name']
 
     class Meta:
         verbose_name = "user"
