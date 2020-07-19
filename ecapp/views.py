@@ -1,8 +1,8 @@
 import re
-import json
 import requests
 import datetime
 import collections
+
 from django.conf import settings
 from django.shortcuts import get_object_or_404, render, redirect
 from django.core.paginator import Paginator
@@ -15,12 +15,13 @@ from rest_framework import viewsets
 from rest_framework import permissions, authentication
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from .forms import AddToCartForm, SellForm
+
 from users.models import Friend, PointFluctuation
 from users.forms import SearchForm, ProfileForm
 from users.views import get_address
 from snsapp.models import Article
 from .models import Product, Sale
+from .forms import AddToCartForm, SellForm
 from .serializers import ProductSerializer
 
 
@@ -57,7 +58,7 @@ def index(request):
                 products = []
                 for product in searched_products:
                     name = product.name
-                    owner = product.owner.username
+                    owner = product.owner.name
                     description = product.description
                     if not description:
                         description = ''
@@ -65,8 +66,10 @@ def index(request):
                     text = ' '.join(text_list)
                     if re.findall(keyword, text, re.IGNORECASE):
                         products.append(product)
+                messages.success(request, f'"{keyword}"の検索結果（{select}）')
             if not keyword:
                 products = searched_products
+                messages.success(request, f'絞り込み（{select}）')
         else:
             messages.warning(request, '無効な検索です')
             return redirect('ecapp:index')
@@ -143,7 +146,7 @@ def detail(request, product_id):
                 request.session['cart'] = {str(product_id): num}
             messages.success(request, f"{product.name}を{num}個カートに入れました！")
             # カートへが押された時
-            if 'in_cart' in request.POST:
+            if 'to_cart' in request.POST:
                 return redirect('ecapp:cart', which_cart=0)
             # 買い物を続けるが押された時
             elif 'go_on' in request.POST:
@@ -336,7 +339,7 @@ def cart(request, which_cart):
                 # 出品者にメール送信
                 subject = '商品が購入されました'
                 message = f'''商品　：　{product.name}　が　{num}個　購入されました。\n\n
-                            購入者　：　{user.username}\n
+                            購入者　：　{user.name}\n
                             住所　：　{user.address}\n\n
                             上記の住所に商品を届けてください。その後{sum}ポイントが付与されます。
                 '''
@@ -352,8 +355,12 @@ def cart(request, which_cart):
                         article = Article.objects.get(id=article_id)
                         author = article.author
                         author.point += int(sum / 100)
+                        # 記事内容を短縮
+                        content = str(article.content)
+                        if len(content) > 20:
+                            content = content[:20] + '...'
                         PointFluctuation.objects.create(
-                            user=author, event=f'記事："{article.content}" からの商品購入', change=int(sum/100))
+                            user=author, event=f'記事："{content}" からの商品購入', change=int(sum/100))
                         del request.session['product_from_article'][str(
                             product_id)]
             user.point -= total_price
@@ -439,8 +446,6 @@ def order_history(request):
 def sell(request):
     '''get:出品ページを表示　post:出品処理'''
     if request.method == 'POST':
-        print(request)
-        print(request.post)
         sell_form = SellForm(request.POST, request.FILES)
         if sell_form.is_valid():
             product = sell_form.save(commit=False)

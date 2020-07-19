@@ -43,7 +43,7 @@
         <div class="mt-auto float-right">
             <div class="d-flex align-items-end">
                 <span class="font-italic mr-2">{{ article.created_at | date:"Y/m/d f" }}</span>
-                by<a href="{% url 'users:user_detail' article.author.id %}">{{ article.author.username }}</a>
+                by<a href="{% url 'users:user_detail' article.author.id %}">{{ article.author.name }}</a>
             </div>
         </div>
     </div>

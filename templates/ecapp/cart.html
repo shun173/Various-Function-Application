@@ -37,7 +37,7 @@
                                                 class="title text-dark h4">{{ product.name }}</a>
                                             <p class="text-muted small">在庫: {{ product.amount }}</p>
                                             <p class="text-muted small">出品者: <a
-                                                    href="{% url 'users:user_detail' product.owner.id %}">{{ product.owner.username }}</a>
+                                                    href="{% url 'users:user_detail' product.owner.id %}">{{ product.owner.name }}</a>
                                             </p>
                                         </div>
                                     </div>

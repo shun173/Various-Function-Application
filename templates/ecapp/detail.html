@@ -37,13 +37,13 @@
                 <p>{{ product.description }}</p>
                 <p class="text-muted d-inline-block mb-0">在庫：　{{ product.amount }}個</p>
                 <span class="float-right mr-2">出品者：<a
-                        href="{% url 'users:user_detail' product.owner.id %}">{{ product.owner.username }}</a>
+                        href="{% url 'users:user_detail' product.owner.id %}">{{ product.owner.name }}</a>
                 </span>
                 <hr>
                 {% if request.user.is_authenticated %}
                 <form action="{% url 'ecapp:detail' product.id %}" method="post">{% csrf_token %}
                     {{ add_to_cart_form.as_p }}
-                    <button type="submit" name="buy_now" class="btn btn-primary"> 今すぐ購入 </button>
+                    <button type="submit" name="buy_now" class="btn btn-primary">今すぐ購入</button>
                     <button type="button" class="btn btn-outline-primary" data-toggle="modal" data-target="#cart">
                         <span class="text">カートに入れる</span>
                         <i class="fas fa-shopping-cart"></i>
@@ -87,7 +87,7 @@
                                 </div>
                                 <div class="modal-footer">
                                     <button type="submit" name="go_on" class="btn btn-outline-primary">買い物を続ける</button>
-                                    <button type="submit" name="in_cart" class="btn btn-primary">
+                                    <button type="submit" name="to_cart" class="btn btn-primary">
                                         <span class="text">カートへ</span>
                                         <i class="fas fa-shopping-cart"></i>
                                     </button>
@@ -141,7 +141,7 @@
                 <div class="mt-auto float-right">
                     <div class="d-flex align-items-end">
                         <span class="font-italic mr-2">{{ article.created_at | date:"Y/m/d f" }}</span>
-                        by<a href="{% url 'users:user_detail' article.author.id %}">{{ article.author.username }}</a>
+                        by<a href="{% url 'users:user_detail' article.author.id %}">{{ article.author.name }}</a>
                     </div>
                 </div>
             </div>

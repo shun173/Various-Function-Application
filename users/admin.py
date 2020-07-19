@@ -16,7 +16,7 @@ class MyUserCreationForm(UserCreationForm):
     """Userを作成するフォーム"""
     class Meta:
         model = User
-        fields = ('email',)
+        fields = ('email', 'name')
 
 
 class MyUserAdmin(UserAdmin):
@@ -25,7 +25,7 @@ class MyUserAdmin(UserAdmin):
         (None, {'fields': ('email',  'password', 'message', 'icon',
                            'fav_products', 'point', 'continuous_login')}),
         (_('Personal info'), {
-         'fields': ('username', 'address')}),
+         'fields': ('name', 'address')}),
         (_('Permissions'), {'fields': ('is_active', 'is_staff', 'is_superuser',
                                        'groups', 'user_permissions')}),
         (_('Important dates'), {
@@ -39,9 +39,9 @@ class MyUserAdmin(UserAdmin):
     )
     form = MyUserChangeForm
     add_form = MyUserCreationForm
-    list_display = ('email', 'username', 'address', 'is_staff')
+    list_display = ('email', 'name', 'address', 'is_staff')
     list_filter = ('is_staff', 'is_superuser', 'is_active', 'groups')
-    search_fields = ('email', 'username')
+    search_fields = ('email', 'name')
     ordering = ('email',)
 
 
