@@ -11,21 +11,29 @@ https://docs.djangoproject.com/en/2.2/ref/settings/
 """
 
 import os
+import environ
+
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
+env = environ.Env()
+
+READ_DOT_ENV_FILE = env.bool('DJANGO_READ_DOT_ENV_FILE', default=False)
+
+if READ_DOT_ENV_FILE:
+    env.read_env(os.path.join(BASE_DIR, '.env'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '0&7r^ijlk^qv2mdi!153=_tet)hxb29acoq$92*)@^f7lojs*g'
+SECRET_KEY = env('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = env.bool('DEBUG', False)
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
 
 
 # Application definition
@@ -42,6 +50,7 @@ INSTALLED_APPS = [
     'bootstrap4',
     'rest_framework',
     'django_filters',
+    'storages',
     'users',
     'ecapp',
     'snsapp',
@@ -90,16 +99,8 @@ WSGI_APPLICATION = 'portfolio.wsgi.application'
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'portfolio_db',
-        'USER': 'root',
-        'PASSWORD': 'ryohusoni',
-        'HOST': '127.0.0.1',
-        'PORT': '3306',
-    }
+    'default': env.db()
 }
-
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
@@ -137,12 +138,31 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
-STATIC_URL = '/static/'
-#STATIC_ROOT = '/static/'
-STATICFILES_DIRS = (os.path.join(BASE_DIR, "static"),)
+AWS_ACCESS_KEY_ID = env('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = 'vfa-bucket'
+# AWS_S3_CUSTOM_DOMAIN = '%s.s3.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
+AWS_S3_CUSTOM_DOMAIN = 'static.various-function-app.work'
+AWS_S3_OBJECT_PARAMETERS = {
+    'CacheControl': 'max-age=86400'
+}
+AWS_LOCATION = 'static'
+AWS_S3_REGION_NAME = 'ap-northeast-1'
+AWS_DEFAULT_ACL = 'public-read'
 
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-MEDIA_URL = '/media/'
+# STATIC_URL = '/static/'
+STATIC_URL = 'https://static.various-function-app.work/static/'
+# STATIC_ROOT = '/static/'
+STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static'),)
+
+STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+# MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+# MEDIA_URL = '/media/'
+MEDIA_URL = 'https://static.various-function-app.work/media/'
+
+DEFAULT_FILE_STORAGE = 'portfolio.storage_backends.MediaStorage'
+
 
 # About login
 LOGIN_URL = 'users:login'
@@ -154,17 +174,17 @@ AUTH_USER_MODEL = 'users.User'
 SESSION_SAVE_EVERY_REQUEST = True
 
 # About mail
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
-EMAIL_PORT = 587
-EMAIL_HOST_USER = 'juntailangdaojian4@gmail.com'
-EMAIL_HOST_PASSWORD = 'xbzsrvnramwsnxne'
-EMAIL_USE_TLS = True
-
-DEFAULT_FROM_EMAIL = 'juntailangdaojian4@gmail.com'
+SECRET_KEY = env('SECRET_KEY')
+EMAIL_BACKEND = env('EMAIL_BACKEND')
+EMAIL_HOST = env('EMAIL_HOST')
+EMAIL_PORT = env('EMAIL_PORT')
+EMAIL_HOST_USER = env('EMAIL_HOST_USER')
+EMAIL_HOST_PASSWORD = env('EMAIL_HOST_PASSWORD')
+EMAIL_USE_TLS = env.bool('EMAIL_USE_TLS')
+DEFAULT_FROM_EMAIL = env('DEFAULT_FROM_EMAIL')
 
 # AUTHENTICATION_BACKENDS
-AUTHENTICATION_BACKENDS = [
-    'django.contrib.auth.backends.ModelBackend',
-    'users.backends.EmailAuthBackend',
-]
+# AUTHENTICATION_BACKENDS = [
+#     'django.contrib.auth.backends.ModelBackend',
+#     'users.backends.EmailAuthBackend',
+# ]
